@@ -12,8 +12,6 @@ import sravnenie
 
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
-
-
 # Объект бота
 last = Router()
 bot = Bot(config.bot_token)
@@ -21,6 +19,7 @@ dp = Dispatcher()
 dp.include_router(sravnenie.router)
 # dp.include_router()
 dp.include_router(last)
+
 
 # Хэндлер на команду /start
 @dp.message(Command("start"))
@@ -31,13 +30,22 @@ async def starting_msg(message: types.Message):
     builder.add(types.KeyboardButton(text='🛒 Сравнить цены'))
     builder.add(types.KeyboardButton(text='👨‍🏫 Мой кабинет'))
     builder.adjust(2)
-    await message.answer(
-        "Привет, добро пожаловать в твой кабинет.\nКакими функциями ты хочешь воспользоваться?",
-        reply_markup=builder.as_markup(
-            resize_keyboard=True,
-            input_field_placeholder="Для навигации пользуйся кнопками с заготовленным текстом"
+    if message.text == '/start':
+        await message.answer(
+            "Привет, добро пожаловать в твой кабинет.\nКакими функциями ты хочешь воспользоваться?",
+            reply_markup=builder.as_markup(
+                resize_keyboard=True,
+                input_field_placeholder="Для навигации пользуйся кнопками с заготовленным текстом"
+            )
         )
-    )
+    else:
+        await message.answer(
+            'Добро пожаловать домой💪👀👍',
+            reply_markup=builder.as_markup(
+                resize_keyboard=True,
+                input_field_placeholder="Для навигации пользуйся кнопками с заготовленным текстом"
+            )
+        )
 
 
 @dp.message(Command("help"))
@@ -61,7 +69,6 @@ async def cmd_cancel_no_state(message: types.Message, state: FSMContext):
     await starting_msg(message)
 
 
-
 @dp.message(Command(commands=["cancel"]))
 @dp.message(F.text.lower() == "отмена")
 async def cmd_cancel(message: types.Message, state: FSMContext):
@@ -83,7 +90,6 @@ async def back_to_main(message: types.Message, state: FSMContext):
 async def nothing(message: types.Message):
     await message.reply('На такую команду я не запрограммирован.')
     await starting_msg(message)
-
 
 
 # @dp.message(Command("dice"))
