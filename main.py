@@ -1,27 +1,26 @@
 import asyncio
 import logging
-from aiogram import Bot, Dispatcher, types, F, html
+from aiogram import Bot, Dispatcher, types, F, html, Router
 from aiogram.filters import Command, StateFilter
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.fsm.state import StatesGroup, State, default_state
 from aiogram.enums import ParseMode
-
 from aiogram.fsm.context import FSMContext
+
 import config
+import sravnenie
 
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
+
+
 # Объект бота
+last = Router()
 bot = Bot(config.bot_token)
 dp = Dispatcher()
-
-
-class Sravn_State(StatesGroup):
-    Sravnenie_gr_1 = State()
-    Sravnenie_price_1 = State()
-    Sravnenie_gr_2 = State()
-    Sravnenie_price_2 = State()
-
+dp.include_router(sravnenie.router)
+# dp.include_router()
+dp.include_router(last)
 
 # Хэндлер на команду /start
 @dp.message(Command("start"))
@@ -47,64 +46,7 @@ async def helping_msg(message: types.Message):
         f'Привет {html.bold(html.quote(message.from_user.full_name))}, этот бот представляет из себя "кабинет", '
         f'в котором ты можешь отслеживать стоимость своих покупок в стиме, валютного кошелька, их изменения и выгодно '
         f'купить гречки.\nНачать работать с ним можно по команде /start.', parse_mode=ParseMode.HTML,
-        reply_markup=types.ReplyKeyboardRemove(),
-        input_field_placeholder="Пиши /start"
-    )
-
-
-@dp.message(F.text == "🛒 Сравнить цены")
-async def sravnenie_cen1(message: types.Message, state: FSMContext):
-    print('зашел')
-    await state.clear()
-    await message.answer(text="Сколько грамм у первого продукта?", reply_markup=types.ReplyKeyboardRemove())
-    await state.set_state(Sravn_State.Sravnenie_gr_1)
-
-
-@dp.message(F.text, Sravn_State.Sravnenie_gr_1)
-async def sravnenie_cen2(message: types.Message, state: FSMContext):
-    print('зашел в состояние введенных граммов')
-    # добавить проверка на всё что угодно кроме текста
-    # добавить проверка на числа
-    await state.update_data(gr_1=message.text)
-    await message.answer('Принято, сколько он стоит?')
-    await state.set_state(Sravn_State.Sravnenie_price_1)
-
-
-@dp.message(F.text, Sravn_State.Sravnenie_price_1)
-async def sravnenie_cen2(message: types.Message, state: FSMContext):
-    print('зашел в состоние введенной цены')
-    # добавить проверка на всё что угодно кроме текста
-    # добавить проверка на числа
-    await state.update_data(pr_1=message.text)
-    await message.answer('А сколько грамм у второго продукта?')
-    await state.set_state(Sravn_State.Sravnenie_gr_2)
-
-
-@dp.message(F.text, Sravn_State.Sravnenie_gr_2)
-async def sravnenie_cen2(message: types.Message, state: FSMContext):
-    print('зашел в состояние введенных граммов2')
-    # добавить проверка на всё что угодно кроме текста
-    # добавить проверка на числа
-    await state.update_data(gr_2=message.text)
-    await message.answer('Принято, сколько стоит второй продукт?')
-    await state.set_state(Sravn_State.Sravnenie_price_2)
-
-
-@dp.message(F.text, Sravn_State.Sravnenie_price_2)
-async def sravnenie_cen2(message: types.Message, state: FSMContext):
-    print('зашел в состоние введеннх всех')
-    # добавить проверка на всё что угодно кроме текста
-    # добавить проверка на числа
-    await state.update_data(pr_2=message.text)
-    user_data = await state.get_data()
-    await message.answer(f'{user_data}')
-    await state.set_state(Sravn_State.Sravnenie_price_2)
-
-
-@dp.message()
-async def nothing(message: types.Message):
-    await message.reply('На такую команду я не запрограммирован')
-    await starting_msg(message)
+        reply_markup=types.ReplyKeyboardRemove())
 
 
 @dp.message(StateFilter(None), Command(commands=["cancel"]))
@@ -128,6 +70,18 @@ async def cmd_cancel(message: types.Message, state: FSMContext):
         text="Действие отменено",
         reply_markup=types.ReplyKeyboardRemove()
     )
+    await starting_msg(message)
+
+
+@dp.message(F.text == "⭕️ Вернуться в главное меню")
+async def back_to_main(message: types.Message, state: FSMContext):
+    await state.clear()
+    await starting_msg(message)
+
+
+@last.message()
+async def nothing(message: types.Message):
+    await message.reply('На такую команду я не запрограммирован.')
     await starting_msg(message)
 
 
