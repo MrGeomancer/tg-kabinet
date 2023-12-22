@@ -3,7 +3,7 @@ import logging
 from aiogram import Bot, Dispatcher, types, F, html
 from aiogram.filters import Command, StateFilter
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.state import StatesGroup, State, default_state
 from aiogram.enums import ParseMode
 
 from aiogram.fsm.context import FSMContext
@@ -25,13 +25,12 @@ class Sravn_State(StatesGroup):
 
 # Хэндлер на команду /start
 @dp.message(Command("start"))
-async def reply_builder(message: types.Message):
+async def starting_msg(message: types.Message):
     builder = ReplyKeyboardBuilder()
     builder.add(types.KeyboardButton(text='📈 Посмотреть на кейсы'))
     builder.add(types.KeyboardButton(text='📈 Посмотреть на валюты'))
     builder.add(types.KeyboardButton(text='🛒 Сравнить цены'))
     builder.add(types.KeyboardButton(text='👨‍🏫 Мой кабинет'))
-
     builder.adjust(2)
     await message.answer(
         "Привет, добро пожаловать в твой кабинет.\nКакими функциями ты хочешь воспользоваться?",
@@ -43,13 +42,14 @@ async def reply_builder(message: types.Message):
 
 
 @dp.message(Command("help"))
-async def reply_builder(message: types.Message):
+async def helping_msg(message: types.Message):
     await message.answer(
         f'Привет {html.bold(html.quote(message.from_user.full_name))}, этот бот представляет из себя "кабинет", '
         f'в котором ты можешь отслеживать стоимость своих покупок в стиме, валютного кошелька, их изменения и выгодно '
         f'купить гречки.\nНачать работать с ним можно по команде /start.', parse_mode=ParseMode.HTML,
         reply_markup=types.ReplyKeyboardRemove(),
-        input_field_placeholder="Пиши /start")
+        input_field_placeholder="Пиши /start"
+    )
 
 
 @dp.message(F.text == "🛒 Сравнить цены")
@@ -99,6 +99,37 @@ async def sravnenie_cen2(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
     await message.answer(f'{user_data}')
     await state.set_state(Sravn_State.Sravnenie_price_2)
+
+
+@dp.message()
+async def nothing(message: types.Message):
+    await message.reply('На такую команду я не запрограммирован')
+    await starting_msg(message)
+
+
+@dp.message(StateFilter(None), Command(commands=["cancel"]))
+@dp.message(default_state, F.text.lower() == "отмена")
+async def cmd_cancel_no_state(message: types.Message, state: FSMContext):
+    # Стейт сбрасывать не нужно, удалим только данные
+    await state.set_data({})
+    await message.answer(
+        text="Нечего отменять",
+        reply_markup=types.ReplyKeyboardRemove()
+    )
+    await starting_msg(message)
+
+
+
+@dp.message(Command(commands=["cancel"]))
+@dp.message(F.text.lower() == "отмена")
+async def cmd_cancel(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer(
+        text="Действие отменено",
+        reply_markup=types.ReplyKeyboardRemove()
+    )
+    await starting_msg(message)
+
 
 
 # @dp.message(Command("dice"))
