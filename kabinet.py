@@ -3,6 +3,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram import F, Router, Bot, Dispatcher, html
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.fsm.context import FSMContext
+from aiogram.enums import ParseMode
 from aiogram.types import Message, ReplyKeyboardRemove, KeyboardButton
 
 import config
@@ -13,13 +14,11 @@ router = Router()
 async def sravnenie_cen1(message: Message, state: FSMContext):
     print('зашел в кабинет')
     await state.clear()
-    await message.answer(text=f"""Привет {html.bold(html.quote(message.from_user.full_name))}, тут ты можешь посмотреть внесенную тобой информацию по
-◉ Кейсам
-◉ Одиночным покупкам
-◉ Валютам
-а так же, в случае необходимости, изменить её. 
-На что смотрим?""",
-                         reply_markup=ReplyKeyboardRemove()
+    await message.answer(text=f"Привет {html.bold(html.quote(message.from_user.full_name))}, тут ты можешь посмотреть "
+                              "внесенную тобой информацию по\n◦ Кейсам \n◦ Одиночным покупкам \n◦ Валютам, а так же, "
+                              "в случае необходимости, изменить её. На что смотрим?",
+                         reply_markup=ReplyKeyboardRemove(),
+                         parse_mode=ParseMode.HTML,
                          )
     # await state.set_state(Sravn_State.Sravnenie_gr_1)
 
