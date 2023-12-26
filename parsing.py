@@ -31,10 +31,20 @@ headers = {
     'sec-ch-ua-platform': '"Windows"',
 }
 
-response = requests.get('https://steamcommunity.com/market/listings/730/Dreams%20%26%20Nightmares%20Case', cookies=cookies, headers=headers)
-print(response)
-bs = BeautifulSoup(response.text,"lxml")
-# print(bs)
-token = bs.find("div", 'responsive_page_template_content')
-# print (token)
-print(str(token)[str(token).index('Market_LoadOrderSpread')+24:str(token).index('PollOnUserActionAfterInterval')-23])
+def get_price(url):
+    global cookies, headers
+    token = get_token(url, cookies, headers)
+    price_url = f'https://steamcommunity.com/market/itemordershistogram?country=RU&language=russian&currency=5&item_nameid={token}'
+    price_page = BeautifulSoup(requests.get(price_url, cookies=cookies, headers=headers).text, 'lxml')
+    price = str(price_page).split('buy_order_graph":[[')[1].split(',')[0]
+    return price
+
+
+def get_token(url, cookies, headers):
+    token_page = BeautifulSoup(requests.get(url, cookies=cookies, headers=headers).text, 'lxml')
+    token_div = str(token_page.find("div", 'responsive_page_template_content'))
+    token = (token_div[token_div.index('Market_LoadOrderSpread') + 24:token_div.index('PollOnUserActionAfterInterval') - 23])
+    return token
+
+
+print (get_price('https://steamcommunity.com/market/listings/730/Dreams%20%26%20Nightmares%20Case'))
