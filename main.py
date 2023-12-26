@@ -9,6 +9,7 @@ from aiogram.fsm.context import FSMContext
 
 import config
 import sravnenie
+import kabinet
 
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +18,7 @@ last = Router()
 bot = Bot(config.bot_token)
 dp = Dispatcher()
 dp.include_router(sravnenie.router)
+dp.include_router(kabinet.router)
 # dp.include_router()
 dp.include_router(last)
 
