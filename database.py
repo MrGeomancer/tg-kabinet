@@ -12,6 +12,13 @@ with sqlite3.connect('database.db') as db:
     price REAL DEFAULT (0) 
     )""")
     db.commit()
-    # cursor.execute('SELECT price FROM cases WHERE url = ?', ['qq'])
-    # caseid = cursor.fetchone()[0]
-    # cursor.execute('ALTER TABLE cases ADD COLUMN userid "TEXT"')
+
+async def take_names_and_prices(user_id):
+    # print(user_id)
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        cursor.execute("SELECT name, price FROM cases WHERE userid = ?", [user_id])
+        cases = cursor.fetchall()
+        # print(cases)
+        db.commit()
+        return cases
