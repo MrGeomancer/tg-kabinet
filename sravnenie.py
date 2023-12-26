@@ -20,8 +20,10 @@ class Sravn_State(StatesGroup):
 @router.message(F.text == "🛒 Сравнить цены")
 async def sravnenie_cen1(message: Message, state: FSMContext):
     print('зашел')
+    builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     await state.clear()
-    await message.answer(text="Сколько грамм у первого продукта?", reply_markup=ReplyKeyboardRemove())
+    await message.answer(text="Сколько грамм у первого продукта?", reply_markup=builder.as_markup(resize_keyboard=True))
     await state.set_state(Sravn_State.Sravnenie_gr_1)
 
 
