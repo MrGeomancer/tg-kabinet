@@ -31,20 +31,17 @@ headers = {
     'sec-ch-ua-platform': '"Windows"',
 }
 
-def get_price(url):
+
+async def get_name_token(url):
     global cookies, headers
-    token = get_token(url, cookies, headers)
-    price_url = f'https://steamcommunity.com/market/itemordershistogram?country=RU&language=russian&currency=5&item_nameid={token}'
-    price_page = BeautifulSoup(requests.get(price_url, cookies=cookies, headers=headers).text, 'lxml')
-    price = str(price_page).split('buy_order_graph":[[')[1].split(',')[0]
-    return price
+    case_page = BeautifulSoup(requests.get(url, cookies=cookies, headers=headers).text, 'lxml')
+    token_div = str(case_page.find("div", 'responsive_page_template_content'))
+    token = (token_div[token_div.index('Market_LoadOrderSpread') + 24
+                       :
+                       token_div.index('PollOnUserActionAfterInterval') - 23])
+    name = str(case_page.find('span', 'market_listing_item_name').text)
+    return {'name': name, 'token': token}
 
 
-def get_token(url, cookies, headers):
-    token_page = BeautifulSoup(requests.get(url, cookies=cookies, headers=headers).text, 'lxml')
-    token_div = str(token_page.find("div", 'responsive_page_template_content'))
-    token = (token_div[token_div.index('Market_LoadOrderSpread') + 24:token_div.index('PollOnUserActionAfterInterval') - 23])
-    return token
-
-
-print (get_price('https://steamcommunity.com/market/listings/730/Dreams%20%26%20Nightmares%20Case'))
+if __name__ == "__main__":
+    get_name_token('https://steamcommunity.com/market/listings/730/Snakebite%20Case')
