@@ -52,7 +52,7 @@ async def kabinet_my_cases(message: Message, state: FSMContext):
     msg = ''
     for lot in text:
         print(lot)
-        msg = msg + f'\n◦{html.bold(lot[0])} купленный за {html.bold(lot[1])} рублей'
+        msg = msg + f'\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(lot[1])} рублей'
         if lot[2] is not None: msg = msg + f' ({lot[2]})'
     await message.answer(text=f"Твои кейсы:{msg}.\nХочешь изменить информацию?",
                          reply_markup=builder.as_markup(resize_keyboard=True),
@@ -109,6 +109,20 @@ async def kabinet_new_ask_komment(message: Message, state: FSMContext):
     await message.reply(text='Принято.')
     await state.clear()
     await kabinet_my_cases(message, state)
+
+
+@router.message(F.text == '❔ Изменить', Kabinet_State.Kabinet_cases)
+async def kabinet_new(message: Message, state: FSMContext):
+    builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
+    await message.answer(text='Напиши в чат id кейса, информацию о котором ты хочешь изменить.'
+                              '\nID пишется перед его названием, при их выводе в кабинете. '
+                              'Через запятую после ID ты должен написать что хочешь изменить из списка '
+                              f'(<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>)'
+                              f'\nПример команды: {html.bold('32, комментарий')}',
+                         parse_mode=ParseMode.HTML,
+                         reply_markup=builder.as_markup(resize_keyboard=True)
+                         )
 
 
 async def kabinet_main():

@@ -21,7 +21,7 @@ async def take_names_and_prices(user_id):
     # print(user_id)
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
-        cursor.execute("SELECT name, price, komment FROM cases WHERE userid = ?", [user_id])
+        cursor.execute("SELECT name, price, komment, caseid FROM cases WHERE userid = ?", [user_id])
         cases = cursor.fetchall()
         # print(cases)
         db.commit()
