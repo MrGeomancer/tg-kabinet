@@ -48,16 +48,28 @@ async def kabinet_my_cases(message: Message, state: FSMContext):
     builder.add(KeyboardButton(text='◀️ Назад'))
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     builder.adjust(3)
+    # Клавиатура для пользователей без кейсов
+    builder2 = ReplyKeyboardBuilder()
+    builder2.add(KeyboardButton(text='➕ Добавить'))
+    builder2.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
+    builder2.adjust(1)
     text = await database.take_names_and_prices(user_id=message.from_user.id)
-    msg = ''
-    for lot in text:
-        print(lot)
-        msg = msg + f'\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(lot[1])} рублей'
-        if lot[2] is not None: msg = msg + f' ({lot[2]})'
-    await message.answer(text=f"Твои кейсы:{msg}.\nХочешь изменить информацию?",
-                         reply_markup=builder.as_markup(resize_keyboard=True),
-                         parse_mode=ParseMode.HTML,
-                         )
+    if text == []:
+        builder
+        await message.answer(text="Ты еще не добавил кейсов в свой кабинет. Можешь добавить сейчас, нажав на кнопку ниже или сделать это позже на этой странице или на странице отслеживания.",
+                             reply_markup=builder2.as_markup(resize_keyboard=True),
+                             parse_mode=ParseMode.HTML,
+                             )
+    else:
+        for lot in text:
+            msg = ''
+            # print(lot)
+            msg = msg + f'\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(lot[1])} рублей'
+            if lot[2] is not None: msg = msg + f' ({lot[2]})'
+        await message.answer(text=f"Твои кейсы:{msg}.\nХочешь изменить информацию?",
+                             reply_markup=builder.as_markup(resize_keyboard=True),
+                             parse_mode=ParseMode.HTML,
+                             )
     await state.set_state(Kabinet_State.Kabinet_cases)
 
 
