@@ -18,6 +18,23 @@ class Kabinet_State(StatesGroup):
     Kabinet_cases_new_ask = State()
     Kabinet_cases_new_ask_price = State()
     Kabinet_cases_new_ask_komment = State()
+    Kabinet_cases_chng_ask = State()
+
+changes_lists={'name':['название','имя'],
+               'price':['цена закупки', 'цена', 'цену'],
+               'discription':['комментарий','коммент','описание','ком'],
+               }
+changes_lists.update({"name_keys":len(changes_lists['name']),
+                      "price_keys":len(changes_lists['price']),
+                      "discription_keys":len(changes_lists['discription'])
+                      })
+changes_list=[]
+for i in changes_lists['name']:
+    changes_list.append(i)
+for i in changes_lists['price']:
+    changes_list.append(i)
+for i in changes_lists['discription']:
+    changes_list.append(i)
 
 
 @router.message(F.text == "👨‍🏫 Мой кабинет")
@@ -73,7 +90,7 @@ async def kabinet_my_cases(message: Message, state: FSMContext):
     await state.set_state(Kabinet_State.Kabinet_cases)
 
 
-@router.message(F.text == '◀️ Назад', Kabinet_State.Kabinet_cases or Kabinet_State.Kabinet_cases_new_ask)
+@router.message(F.text == '◀️ Назад', Kabinet_State.Kabinet_cases or Kabinet_State.Kabinet_cases_new_ask or Kabinet_State.Kabinet_cases_chng_ask)
 async def kabinet_back(message: Message, state: FSMContext):
     await state.clear()
     await kabinet_main_page(message, state)
@@ -128,13 +145,61 @@ async def kabinet_new(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     await message.answer(text='Напиши в чат id кейса, информацию о котором ты хочешь изменить.'
-                              '\nID пишется перед его названием, при их выводе в кабинете. '
+                              '\nID пишется в списке перед его названием, при их выводе, в кабинете. '
                               'Через запятую после ID ты должен написать что хочешь изменить из списка '
-                              f'(<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>)'
+                              '(<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>)'
                               f'\nПример команды: {html.bold('32, комментарий')}',
                          parse_mode=ParseMode.HTML,
                          reply_markup=builder.as_markup(resize_keyboard=True)
                          )
+    await state.set_state(Kabinet_State.Kabinet_cases_chng_ask)
+
+
+@router.message(F.text, Kabinet_State.Kabinet_cases_chng_ask)
+async def kabinet_new_ask(message: Message, state: FSMContext):
+    builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text='◀️ Назад'))
+    builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
+    msg = message.text.split(',')
+    if len(msg) > 2:
+        await message.reply(text='Можно передать только два параметра, разделенных запятой.\n<b>ID</b>,<b>что изменить</b>',
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=builder.as_markup(resize_keyboard=True)
+                            )
+        await message.answer(text='Давай ты попробуешь еще раз.')
+        await state.set_state(Kabinet_State.Kabinet_cases_chng_ask)
+
+    elif ',' not in msg:
+        await message.reply(text='Тебе надо отправить ID и через запяную написать что изменить, как в примере в прошлом сообщении.\n<b>ID</b>,<b>что изменить</b>',
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=builder.as_markup(resize_keyboard=True)
+                            )
+        await message.answer(text='Давай ты попробуешь еще раз.')
+        await state.set_state(Kabinet_State.Kabinet_cases_chng_ask)
+
+    elif msg[1] not in changes_list:
+        await message.reply(text='Тебе надо отправить ID и через запяную написать что изменить, как в примере в прошлом сообщении. Используй что-то одно из (<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>)\n<b>ID</b>,<b>что изменить</b>',
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=builder.as_markup(resize_keyboard=True)
+                            )
+        await message.answer(text='Давай ты попробуешь еще раз.')
+        await state.set_state(Kabinet_State.Kabinet_cases_chng_ask)
+    elif not msg[0].isdigit():
+        await message.reply(text='Тебе надо отправить числовой ID, он пишется перед названием кейса.\n<b>ID</b>,<b>что изменить</b>',
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=builder.as_markup(resize_keyboard=True)
+                            )
+        await message.answer(text='Давай ты попробуешь еще раз.')
+        await state.set_state(Kabinet_State.Kabinet_cases_chng_ask)
+    else:
+        await state.update_data(change_case_id=msg[0])
+        await state.update_data(change_case_change=changes_list.index(msg[1]))
+        # тут я получил значение того, что человек хочет поменять и у какого кейса, дальше надо спросить новое значение для изменяемого параметра и там обратиться в базу данных для изменения этого параментра на новое значение, после снока показать ему список кейсов, то есть открыть существубщий деф и функция допилен
+        user_data = await state.get_data()
+
+    await state.update_data(link=message.text)
+    await state.set_state(Kabinet_State.Kabinet_cases_new_ask_price)
+
 
 
 async def kabinet_main():
