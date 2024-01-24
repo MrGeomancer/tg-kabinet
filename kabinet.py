@@ -82,6 +82,7 @@ async def kabinet_my_cases(message: Message, state: FSMContext):
     builder2.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     builder2.adjust(1)
     text = await database.take_names_and_prices(user_id=message.from_user.id)
+    # print(text)
     if text == []:
         builder
         await message.answer(text="Ты еще не добавил кейсов в свой кабинет. Можешь добавить сейчас, нажав на кнопку ниже или сделать это позже на этой странице или на странице отслеживания.",
@@ -89,9 +90,9 @@ async def kabinet_my_cases(message: Message, state: FSMContext):
                              parse_mode=ParseMode.HTML,
                              )
     else:
+        msg = ''
         for lot in text:
-            msg = ''
-            # print(lot)
+            # print("lot ",lot)
             msg = msg + f'\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(lot[1])} рублей'
             if lot[2] is not None: msg = msg + f' ({lot[2]})'
         await message.answer(text=f"Твои кейсы:{msg}.\nХочешь изменить информацию?",
@@ -135,7 +136,7 @@ async def kabinet_new_ask_price(message: Message, state: FSMContext):
     text = await database.add_case(user_data, user_id=message.from_user.id)
     msg = (f'{text['name']} был добавлен в твою базу данных со стоимостью в {user_data['price']}.'
            '\nХочешь добавить комментарий к этой закупке? '
-           'Можешь написать его сообщением или, если нет, то нажать на кнопку')
+           'Можешь написать его сообщением или, если нет, то жми на кнопку')
     await message.answer(text=msg,
                          reply_markup=builder.as_markup(resize_keyboard=True)
                          )
