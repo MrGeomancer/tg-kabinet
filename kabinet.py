@@ -19,6 +19,7 @@ class Kabinet_State(StatesGroup):
     Kabinet_cases_new_ask_price = State()
     Kabinet_cases_new_ask_komment = State()
     Kabinet_cases_chng_ask = State()
+    Kabinet_cases_chng_value = State()
 
 changes_lists={'name':['название','имя'],
                'price':['цена закупки', 'цена', 'цену'],
@@ -35,6 +36,16 @@ for i in changes_lists['price']:
     changes_list.append(i)
 for i in changes_lists['discription']:
     changes_list.append(i)
+
+
+async def take_change(index):
+    if index+1 <= changes_lists['name_keys']:
+        change_item = 'name'
+    elif index+1 > changes_lists['name_keys'] and index+1 <= changes_lists['price_keys']:
+        change_item = 'price'
+    elif index+1 > changes_lists['price_keys'] and index+1 <= changes_lists['discription_keys']:
+        change_item = 'discription'
+    return change_item
 
 
 @router.message(F.text == "👨‍🏫 Мой кабинет")
@@ -156,7 +167,7 @@ async def kabinet_new(message: Message, state: FSMContext):
 
 
 @router.message(F.text, Kabinet_State.Kabinet_cases_chng_ask)
-async def kabinet_new_ask(message: Message, state: FSMContext):
+async def kabinet_change_ask(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text='◀️ Назад'))
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
@@ -193,13 +204,27 @@ async def kabinet_new_ask(message: Message, state: FSMContext):
         await state.set_state(Kabinet_State.Kabinet_cases_chng_ask)
     else:
         await state.update_data(change_case_id=msg[0])
-        await state.update_data(change_case_change=changes_list.index(msg[1]))
-        # тут я получил значение того, что человек хочет поменять и у какого кейса, дальше надо спросить новое значение для изменяемого параметра и там обратиться в базу данных для изменения этого параментра на новое значение, после снока показать ему список кейсов, то есть открыть существубщий деф и функция допилен
-        user_data = await state.get_data()
+        change = await take_change(changes_list.index(msg[1]))
+        await state.update_data(change_case_changeitem=change)
+        await message.reply(text=f'Хорошо, напиши в следующем сообщении на какое значение ты хочешь поменять параметр {change}',
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=builder.as_markup(resize_keyboard=True)
+                            )
+        await state.set_state(Kabinet_State.Kabinet_cases_chng_value)
 
-    await state.update_data(link=message.text)
-    await state.set_state(Kabinet_State.Kabinet_cases_new_ask_price)
-
+@router.message(F.text, Kabinet_State.Kabinet_cases_chng_value)
+async def kabinet_change_ask_value(message: Message, state: FSMContext):
+    await message.reply(text='Хорошо, изменения направлены в базу, сейчас покажу что получилось')
+    await state.update_data(change_case_changenew)
+    user_data = await state.get_data()
+    result = await database.change_smth(user_data, user_id=message.from_user.id)
+    if result is True:
+        await state.clear()
+        await kabinet_my_cases(message, state)
+    else:
+        await message.answer(text='Что-то пошло не так...')
+        await state.clear()
+        await main.starting_msg(message)
 
 
 async def kabinet_main():

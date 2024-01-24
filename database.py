@@ -47,7 +47,20 @@ async def add_komment(user_data, user_id):
         cursor = db.cursor()
         cursor.execute('SELECT caseid FROM cases WHERE userid = ?', [user_id])
         caseids = cursor.fetchall()
-        print(caseids)
+        # print(caseids)
         cursor.execute('UPDATE cases SET komment = ? WHERE userid = ? AND url = ? AND caseid = ?',
                        [user_data['komment'], user_id, user_data['link'], caseids[-1][0]])
         db.commit()
+
+async def change_smth(user_data, user_id):
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        try:
+            cursor.execute('UPDATE cases SET ? = ? WHERE userid =? AND caseid = ?',[
+                           user_data['change_case_changeitem'], user_data['change_case_changenew'], user_id, user_data['change_case_id']
+                           ])
+            db.commit()
+            return True
+        except Exception as e:
+            print('Ошибка при измененнии чего-то в таблице\n', e)
+            db.commit()
