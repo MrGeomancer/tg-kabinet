@@ -56,9 +56,18 @@ async def change_smth(user_data, user_id):
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
         try:
-            cursor.execute('UPDATE cases SET ? = ? WHERE userid =? AND caseid = ?',[
-                           user_data['change_case_changeitem'], user_data['change_case_changenew'], user_id, user_data['change_case_id']
-                           ])
+            if user_data['change_case_changeitem'] == 'name':
+                cursor.execute('UPDATE cases SET name = ? WHERE userid =? AND caseid = ?',[
+                                user_data['change_case_changenew'], user_id, user_data['change_case_id']
+                               ])
+            elif user_data['change_case_changeitem'] == 'price':
+                cursor.execute('UPDATE cases SET price = ? WHERE userid =? AND caseid = ?',[
+                                user_data['change_case_changenew'], user_id, user_data['change_case_id']
+                               ])
+            elif user_data['change_case_changeitem'] == 'description':
+                cursor.execute('UPDATE cases SET komment = ? WHERE userid =? AND caseid = ?',[
+                                user_data['change_case_changenew'], user_id, user_data['change_case_id']
+                               ])
             db.commit()
             return True
         except Exception as e:

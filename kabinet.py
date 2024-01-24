@@ -44,7 +44,7 @@ async def take_change(index):
     elif index+1 > changes_lists['name_keys'] and index+1 <= changes_lists['price_keys']:
         change_item = 'price'
     elif index+1 > changes_lists['price_keys'] and index+1 <= changes_lists['discription_keys']:
-        change_item = 'discription'
+        change_item = 'description'
     return change_item
 
 
@@ -76,6 +76,7 @@ async def kabinet_my_cases(message: Message, state: FSMContext):
     builder.add(KeyboardButton(text='◀️ Назад'))
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     builder.adjust(3)
+
     # Клавиатура для пользователей без кейсов
     builder2 = ReplyKeyboardBuilder()
     builder2.add(KeyboardButton(text='➕ Добавить'))
@@ -94,7 +95,7 @@ async def kabinet_my_cases(message: Message, state: FSMContext):
         for lot in text:
             # print("lot ",lot)
             msg = msg + f'\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(lot[1])} рублей'
-            if lot[2] is not None: msg = msg + f' ({lot[2]})'
+            if lot[2] is not None: msg = msg + f' <i>({lot[2]})</i>'
         await message.answer(text=f"Твои кейсы:{msg}.\nХочешь изменить информацию?",
                              reply_markup=builder.as_markup(resize_keyboard=True),
                              parse_mode=ParseMode.HTML,
@@ -102,8 +103,9 @@ async def kabinet_my_cases(message: Message, state: FSMContext):
     await state.set_state(Kabinet_State.Kabinet_cases)
 
 
-@router.message(F.text == '◀️ Назад', Kabinet_State.Kabinet_cases or Kabinet_State.Kabinet_cases_new_ask or Kabinet_State.Kabinet_cases_chng_ask)
+@router.message(F.text == '◀️ Назад', Kabinet_State())
 async def kabinet_back(message: Message, state: FSMContext):
+    print('поймал команду Съебаться')
     await state.clear()
     await kabinet_main_page(message, state)
 
@@ -155,6 +157,7 @@ async def kabinet_new_ask_komment(message: Message, state: FSMContext):
 @router.message(F.text == '❔ Изменить', Kabinet_State.Kabinet_cases)
 async def kabinet_new(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text='◀️ Назад'))
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     await message.answer(text='Напиши в чат id кейса, информацию о котором ты хочешь изменить.'
                               '\nID пишется в списке перед его названием, при их выводе, в кабинете. '
@@ -172,24 +175,20 @@ async def kabinet_change_ask(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text='◀️ Назад'))
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
+    print(message.text)
     msg = message.text.split(',')
-    if len(msg) > 2:
+    try: msg[1]=msg[1].strip().lower()
+    except: pass
+    if len(msg) > 2 or len(msg) < 2:
+        print('много запятых')
         await message.reply(text='Можно передать только два параметра, разделенных запятой.\n<b>ID</b>,<b>что изменить</b>',
                             parse_mode=ParseMode.HTML,
                             reply_markup=builder.as_markup(resize_keyboard=True)
                             )
         await message.answer(text='Давай ты попробуешь еще раз.')
         await state.set_state(Kabinet_State.Kabinet_cases_chng_ask)
-
-    elif ',' not in msg:
-        await message.reply(text='Тебе надо отправить ID и через запяную написать что изменить, как в примере в прошлом сообщении.\n<b>ID</b>,<b>что изменить</b>',
-                            parse_mode=ParseMode.HTML,
-                            reply_markup=builder.as_markup(resize_keyboard=True)
-                            )
-        await message.answer(text='Давай ты попробуешь еще раз.')
-        await state.set_state(Kabinet_State.Kabinet_cases_chng_ask)
-
     elif msg[1] not in changes_list:
+        print('предложенного параметра нет в списке')
         await message.reply(text='Тебе надо отправить ID и через запяную написать что изменить, как в примере в прошлом сообщении. Используй что-то одно из (<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>)\n<b>ID</b>,<b>что изменить</b>',
                             parse_mode=ParseMode.HTML,
                             reply_markup=builder.as_markup(resize_keyboard=True)
@@ -197,6 +196,7 @@ async def kabinet_change_ask(message: Message, state: FSMContext):
         await message.answer(text='Давай ты попробуешь еще раз.')
         await state.set_state(Kabinet_State.Kabinet_cases_chng_ask)
     elif not msg[0].isdigit():
+        print('id написан не цифрой')
         await message.reply(text='Тебе надо отправить числовой ID, он пишется перед названием кейса.\n<b>ID</b>,<b>что изменить</b>',
                             parse_mode=ParseMode.HTML,
                             reply_markup=builder.as_markup(resize_keyboard=True)
@@ -216,16 +216,16 @@ async def kabinet_change_ask(message: Message, state: FSMContext):
 @router.message(F.text, Kabinet_State.Kabinet_cases_chng_value)
 async def kabinet_change_ask_value(message: Message, state: FSMContext):
     await message.reply(text='Хорошо, изменения направлены в базу, сейчас покажу что получилось')
-    await state.update_data(change_case_changenew)
+    await state.update_data(change_case_changenew=message.text)
     user_data = await state.get_data()
     result = await database.change_smth(user_data, user_id=message.from_user.id)
     if result is True:
         await state.clear()
         await kabinet_my_cases(message, state)
     else:
-        await message.answer(text='Что-то пошло не так...')
+        await message.answer(text='Что-то пошло не так при изменении данных в базе...')
         await state.clear()
-        await main.starting_msg(message)
+        await kabinet_main_page(message, state)
 
 
 async def kabinet_main():
