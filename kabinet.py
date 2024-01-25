@@ -123,26 +123,42 @@ async def kabinet_new(message: Message, state: FSMContext):
 
 @router.message(F.text, Kabinet_State.Kabinet_cases_new_ask)
 async def kabinet_new_ask(message: Message, state: FSMContext):
-    await message.reply(text='За сколько ты его купил?')
-    await state.update_data(link=message.text)
-    await state.set_state(Kabinet_State.Kabinet_cases_new_ask_price)
+    if message.text[:43] == 'https://steamcommunity.com/market/listings/':
+        await message.reply(text='За сколько ты его купил?')
+        await state.update_data(link=message.text)
+        await state.set_state(Kabinet_State.Kabinet_cases_new_ask_price)
+    else:
+        print(message.text[:44])
+        print('https://steamcommunity.com/market/listings/')
+        await message.reply('Принимается только ссылка из адрессной строки браузера, по которой можно перейти на страницу кейса.')
+        await message.answer(text='Давай ты попробуешь еще раз.')
 
 
 @router.message(F.text, Kabinet_State.Kabinet_cases_new_ask_price)
 async def kabinet_new_ask_price(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
-    await state.update_data(price=message.text)
-    await message.reply(text='Принято, ждем добавления...⏳')
-    user_data = await state.get_data()
-    text = await database.add_case(user_data, user_id=message.from_user.id)
-    msg = (f'{text['name']} был добавлен в твою базу данных со стоимостью в {user_data['price']}.'
-           '\nХочешь добавить комментарий к этой закупке? '
-           'Можешь написать его сообщением или, если нет, то жми на кнопку')
-    await message.answer(text=msg,
-                         reply_markup=builder.as_markup(resize_keyboard=True)
-                         )
-    await state.set_state(Kabinet_State.Kabinet_cases_new_ask_komment)
+    msg = message.text
+    try:
+        msg = float(msg.replace(",", "."))
+        await state.update_data(price=message.text)
+        await message.reply(text='Принято, ждем добавления...⏳')
+        # await state.set_state(Ignor_user_State.Ignoring)
+        user_data = await state.get_data()
+        text = await database.add_case(user_data, user_id=message.from_user.id)
+        msg = (f'{text['name']} был добавлен в твою базу данных со стоимостью в {user_data['price']}.'
+               '\nХочешь добавить комментарий к этой закупке? '
+               'Можешь написать его сообщением или, если нет, то жми на кнопку')
+        await message.answer(text=msg,
+                             reply_markup=builder.as_markup(resize_keyboard=True)
+                             )
+        await state.set_state(Kabinet_State.Kabinet_cases_new_ask_komment)
+    except ValueError:
+        await message.reply('Вводи пожалуйста только цифры')
+        await state.set_state(Kabinet_State.Kabinet_cases_new_ask_price)
+    except Exception as e:
+        print('словил хуйню',e)
+        pass
 
 
 @router.message(F.text, Kabinet_State.Kabinet_cases_new_ask_komment)
