@@ -24,7 +24,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     builder.adjust(2)
     await message.answer(text=f"Привет {html.bold(html.quote(message.from_user.full_name))}, тут ты можешь посмотреть "
-                              "внесенную тобой информацию по\n◦ Кейсам \n◦ Одиночным покупкам \n◦ Валютам,\n◦а так же, "
+                              "внесенную тобой информацию по\n◦ Кейсам \n◦ Одиночным покупкам \n◦ Валютам,\nа так же, "
                               "в случае необходимости, изменить её. На что смотрим?",
                          reply_markup=builder.as_markup(resize_keyboard=True),
                          parse_mode=ParseMode.HTML,
