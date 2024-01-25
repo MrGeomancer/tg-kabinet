@@ -9,7 +9,7 @@ from aiogram.fsm.context import FSMContext
 
 import config
 import sravnenie
-import kabinet
+from kabinet import kabinet
 
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
