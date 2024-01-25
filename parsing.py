@@ -34,6 +34,7 @@ headers = {
 
 async def get_name_token(url):
     global cookies, headers
+    print(url)
     case_page = BeautifulSoup(requests.get(url, cookies=cookies, headers=headers).text, 'lxml')
     token_div = str(case_page.find("div", 'responsive_page_template_content'))
     token = (token_div[token_div.index('Market_LoadOrderSpread') + 24
@@ -42,8 +43,9 @@ async def get_name_token(url):
     name = str(case_page.find('span', 'market_listing_item_name').text)
     if name == "":
         print('Было вытащено пустое имя')
-        get_name_token(url)
-    return {'name': name, 'token': token}
+        await get_name_token(url)
+    else:
+        return {'name': name, 'token': token}
 
 
 if __name__ == "__main__":
