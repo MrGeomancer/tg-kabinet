@@ -63,7 +63,7 @@ async def kabinet_cases_main(message: Message, state: FSMContext):
     # Клавиатура для пользователей без кейсов
     builder2 = ReplyKeyboardBuilder()
     builder2.add(KeyboardButton(text='➕ Добавить'))
-    builder.add(KeyboardButton(text='◀️ Назад'))
+    builder2.add(KeyboardButton(text='◀️ Назад'))
     builder2.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     builder2.adjust(2)
     text = await database.take_names_and_prices(user_id=message.from_user.id)
@@ -245,9 +245,10 @@ async def kabinet_new(message: Message, state: FSMContext):
 
 @router.message(F.text, Kabinet_сases_state.Kabinet_cases_del)
 async def kabinet_new(message: Message, state: FSMContext):
-    msg = msg.split(',')
-    for i in range(len(msg))
+    msg = message.text.split(',')
+    for i in range(len(msg)):
         msg[i] = msg[i].strip()
-        # передать список в базу данных и сразу удалить их
-        # сказать что все ок
-        # запустить функцию мейн_кейсы
+    text = await database.del_case(msg, user_id=message.from_user.id)
+    await message.reply(text)
+    await state.clear()
+    await kabinet_cases_main(message, state)

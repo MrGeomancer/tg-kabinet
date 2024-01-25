@@ -1,4 +1,5 @@
 import sqlite3
+import logging
 
 import parsing
 
@@ -77,3 +78,16 @@ async def change_smth(user_data, user_id):
         except Exception as e:
             print('Ошибка при измененнии чего-то в таблице\n', e)
             db.commit()
+
+
+async def del_case(user_data, user_id):
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        try:
+            for item in user_data:
+                cursor.execute('DELETE FROM cases WHERE caseid =?',[item])
+            db.commit()
+            return f'Кейсы с ID {user_data} удалены'
+        except Exception as e:
+            logging.error('Error at %s', 'def del_case', exc_info=e)
+            return f'Ошибка\n{e}\nПередай её комунибудь, умоляю!!!'
