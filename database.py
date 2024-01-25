@@ -29,6 +29,10 @@ async def take_names_and_prices(user_id):
 
 
 async def add_case(user_data, user_id):
+    #
+    #добавить сюда проверку дублей, если кейс уже есть в базе, то не парсить его
+    #
+    #
     name_token = await parsing.get_name_token(user_data['link'])
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
