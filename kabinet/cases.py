@@ -5,6 +5,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.enums import ParseMode
 from aiogram.types import Message, ReplyKeyboardRemove, KeyboardButton
+import logging
 
 import database
 
@@ -19,6 +20,7 @@ class Kabinet_сases_state(StatesGroup):
     Kabinet_cases_new_ask_komment = State()
     Kabinet_cases_chng_ask = State()
     Kabinet_cases_chng_value = State()
+    Kabinet_cases_del = State()
 
 
 changes_lists={'name':['название','имя'],
@@ -61,8 +63,9 @@ async def kabinet_cases_main(message: Message, state: FSMContext):
     # Клавиатура для пользователей без кейсов
     builder2 = ReplyKeyboardBuilder()
     builder2.add(KeyboardButton(text='➕ Добавить'))
+    builder.add(KeyboardButton(text='◀️ Назад'))
     builder2.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
-    builder2.adjust(1)
+    builder2.adjust(2)
     text = await database.take_names_and_prices(user_id=message.from_user.id)
     # print(text)
     if text == []:
@@ -94,6 +97,7 @@ async def kabinet_back(message: Message, state: FSMContext):
 @router.message(F.text == '➕ Добавить', Kabinet_сases_state.Kabinet_cases)
 async def kabinet_cases_new(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text='◀️ Назад'))
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     await message.reply(text='Отправь пожалуйста ссылку на стим маркет нужного тебе кейса и больше ничего не добавляй '
                              'в сообщение.',
@@ -223,3 +227,27 @@ async def kabinet_cases_change_ask_value(message: Message, state: FSMContext):
         await message.answer(text='Что-то пошло не так при изменении данных в базе...')
         await state.clear()
         await kabinet_main_page(message, state)
+
+
+@router.message(F.text == '➖ Удалить', Kabinet_сases_state.Kabinet_cases)
+async def kabinet_new(message: Message, state: FSMContext):
+    builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text='◀️ Назад'))
+    builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
+    await message.answer(text='Напиши в чат id кейса, который ты хочешь удалить из своей базы данных.'
+                              '\nID пишется в списке перед его названием, при их выводе, в кабинете. '
+                              'Через запятую после ID ты можешь написать еще несколько ID',
+                         parse_mode=ParseMode.HTML,
+                         reply_markup=builder.as_markup(resize_keyboard=True)
+                         )
+    await state.set_state(Kabinet_сases_state.Kabinet_cases_del)
+
+
+@router.message(F.text, Kabinet_сases_state.Kabinet_cases_del)
+async def kabinet_new(message: Message, state: FSMContext):
+    msg = msg.split(',')
+    for i in range(len(msg))
+        msg[i] = msg[i].strip()
+        # передать список в базу данных и сразу удалить их
+        # сказать что все ок
+        # запустить функцию мейн_кейсы
