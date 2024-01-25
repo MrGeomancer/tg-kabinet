@@ -96,7 +96,7 @@ async def ignoring_text(message: types.Message, state: FSMContext):
 
 
 @last.message()
-async def nothing(message: types.Message):
+async def nothing(message: types.Message, state: FSMContext):
     await message.reply('На такую команду я не запрограммирован.')
     await state.clear()
     await starting_msg(message)
