@@ -22,6 +22,9 @@ dp.include_router(kabinet.router)
 # dp.include_router()
 dp.include_router(last)
 
+#Состояние игнорирования пользователя
+class Ignor_user_State(StatesGroup):
+    Ignoring = State()
 
 # Хэндлер на команду /start
 @dp.message(Command("start"))
@@ -87,10 +90,15 @@ async def back_to_main(message: types.Message, state: FSMContext):
     await state.clear()
     await starting_msg(message)
 
+@dp.message(Ignor_user_State.Ignoring)
+async def ignoring_text(message: types.Message, state: FSMContext):
+    await message.reply('Подожди, выполняется прошлая команда')
+
 
 @last.message()
 async def nothing(message: types.Message):
     await message.reply('На такую команду я не запрограммирован.')
+    await state.clear()
     await starting_msg(message)
 
 
