@@ -30,18 +30,20 @@ changes_lists={
                'discription':['комментарий','коммент','описание','ком','описание'],
                'count':['кол-во','колличество','колво','количество','закуп','объем','к','кол'],
                }
-changes_lists.update({"name_keys":len(changes_lists['name']),
-                      "price_keys":len(changes_lists['price']),
-                      "discription_keys":len(changes_lists['discription']),
-                      "count_keys":len(changes_lists['count'])
-                      })
+
 changes_list=[]
 for znach in changes_lists.values():
     for text in znach:
         changes_list.append(text)
 
+changes_lists.update({"name_keys":len(changes_lists['name']),
+                      "price_keys":len(changes_lists['price']),
+                      "discription_keys":len(changes_lists['discription']),
+                      "count_keys":len(changes_lists['count'])
+                      })
 
-async def take_change(index
+
+async def take_change(index):
     if index+1 <= changes_lists['name_keys']:
         change_item = 'name'
     elif index+1 > changes_lists['name_keys'] and index+1 <= changes_lists['price_keys']:
