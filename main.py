@@ -9,16 +9,18 @@ from aiogram.fsm.context import FSMContext
 
 import config
 import sravnenie
+import lookat_cases
 from kabinet import kabinet
 
 # Включаем логирование, чтобы не пропустить важные сообщения
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",)
 # Объект бота
 last = Router()
 bot = Bot(config.bot_token)
 dp = Dispatcher()
 dp.include_router(sravnenie.router)
 dp.include_router(kabinet.router)
+dp.include_router(lookat_cases.router)
 # dp.include_router()
 dp.include_router(last)
 

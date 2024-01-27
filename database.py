@@ -14,7 +14,9 @@ with sqlite3.connect('database.db') as db:
     name TEXT,
     price REAL DEFAULT (0),
     count INTEGER DEFAULT (1),
-    komment TEXT
+    komment TEXT,
+    lastprice REAL DEFAULT (0),
+    timecheck TEXT DEFAULT (0)
     )""")
     db.commit()
 
@@ -76,6 +78,10 @@ async def change_smth(user_data, user_id):
                 cursor.execute('UPDATE cases SET komment = ? WHERE userid =? AND caseid = ?',[
                                 user_data['change_case_changenew'], user_id, user_data['change_case_id']
                                ])
+            elif user_data['change_case_changeitem'] == 'count':
+                cursor.execute('UPDATE cases SET count = ? WHERE userid =? AND caseid = ?',[
+                                user_data['change_case_changenew'], user_id, user_data['change_case_id']
+                               ])
             db.commit()
             return True
         except Exception as e:
@@ -94,3 +100,20 @@ async def del_case(user_data, user_id):
         except Exception as e:
             logging.error('Error at %s', 'def del_case', exc_info=e)
             return f'Ошибка\n{e}\nПередай её комунибудь, умоляю!!!'
+
+
+async def get_tokens(user_id):
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        cursor.execute("SELECT token, name, price, count, lastprice, timecheck FROM cases WHERE userid = ?", [user_id])
+        for_parsing = cursor.fetchall()
+        # print(cases)
+        db.commit()
+        dict_for_parsing = {}
+        i=0
+        # print(for_parsing)
+        for item in for_parsing:
+            # print(item)
+            dict_for_parsing.update({i:{'name':item[1],'token':item[0],'price':item[2],'count':item[3],'lastprice':item[4], 'timecheck':item[5]}})
+            i += 1
+        return dict_for_parsing

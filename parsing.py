@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 
+import database
+
 cookies = {
     'sessionid': '3f508f3dc960c4ec077ddab2',
     'timezoneOffset': '18000,0',
@@ -47,6 +49,24 @@ async def get_name_token(url):
         name_token['name'], name_token['token'] = name,token
     return name_token
 
+
+async def get_pricec(user_id):
+    global cookies, headers, price_page
+    data_list = await database.get_tokens(user_id)
+    # print('data_list:',data_list)
+    # print('data_list.values',data_list.values())
+    for item in data_list.values():
+        # print(item)
+        token = item['token']
+        # print(token)
+        url = f'https://steamcommunity.com/market/itemordershistogram?country=RU&language=russian&currency=5&item_nameid={token}'
+        price_page = BeautifulSoup(requests.get(url, cookies=cookies, headers=headers).text, 'lxml')
+        price=price_page.split("""<span class='\"market_commodity_orders_header_promote\"'>""")[1].split('&lt;\/span&gt;')
+        # print(price_page)
+        # price_div = str(price_page.find("class", '\"market_commodity_orders_header_promote\"'))
+        print(price)
+        # buy_order_summary
+    return data_list
 
 if __name__ == "__main__":
     get_name_token('https://steamcommunity.com/market/listings/730/Snakebite%20Case')
