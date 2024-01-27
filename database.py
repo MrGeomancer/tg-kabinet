@@ -13,6 +13,7 @@ with sqlite3.connect('database.db') as db:
     token TEXT,
     name TEXT,
     price REAL DEFAULT (0),
+    count INTEGER DEFAULT (1),
     komment TEXT
     )""")
     db.commit()
@@ -22,7 +23,7 @@ async def take_names_and_prices(user_id):
     # print(user_id)
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
-        cursor.execute("SELECT name, price, komment, caseid FROM cases WHERE userid = ?", [user_id])
+        cursor.execute("SELECT name, price, komment, caseid, count FROM cases WHERE userid = ?", [user_id])
         cases = cursor.fetchall()
         # print(cases)
         db.commit()
@@ -35,11 +36,13 @@ async def add_case(user_data, user_id):
     #
     #
     name_token = await parsing.get_name_token(user_data['link'])
+    print(user_data)
+    print('name_token:' ,name_token)
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
         try:
-            cursor.execute("INSERT INTO cases (userid, url, token, name, price) VALUES (?, ?, ?, ?, ?)",
-                           (user_id, user_data['link'],name_token['token'], name_token['name'], user_data['price']))
+            cursor.execute("INSERT INTO cases (userid, url, token, name, price, count) VALUES (?, ?, ?, ?, ?, ?)",
+                           (user_id, user_data['link'],name_token['token'], name_token['name'], user_data['price'], user_data['count']))
             db.commit()
             return name_token
         except Exception as e:

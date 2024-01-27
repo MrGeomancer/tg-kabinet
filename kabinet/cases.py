@@ -17,36 +17,39 @@ class Kabinet_сases_state(StatesGroup):
     Kabinet_cases = State()
     Kabinet_cases_new_ask = State()
     Kabinet_cases_new_ask_price = State()
+    Kabinet_cases_new_ask_count = State()
     Kabinet_cases_new_ask_komment = State()
     Kabinet_cases_chng_ask = State()
     Kabinet_cases_chng_value = State()
     Kabinet_cases_del = State()
 
 
-changes_lists={'name':['название','имя'],
-               'price':['цена закупки', 'цена', 'цену'],
-               'discription':['комментарий','коммент','описание','ком'],
+changes_lists={
+               'name':['название','имя','и'],
+               'price':['цена закупки', 'цена', 'цену','стоимость','ц'],
+               'discription':['комментарий','коммент','описание','ком','описание'],
+               'count':['кол-во','колличество','колво','количество','закуп','объем','к','кол'],
                }
 changes_lists.update({"name_keys":len(changes_lists['name']),
                       "price_keys":len(changes_lists['price']),
-                      "discription_keys":len(changes_lists['discription'])
+                      "discription_keys":len(changes_lists['discription']),
+                      "count_keys":len(changes_lists['count'])
                       })
 changes_list=[]
-for i in changes_lists['name']:
-    changes_list.append(i)
-for i in changes_lists['price']:
-    changes_list.append(i)
-for i in changes_lists['discription']:
-    changes_list.append(i)
+for znach in changes_lists.values():
+    for text in znach:
+        changes_list.append(text)
 
 
-async def take_change(index):
+async def take_change(index
     if index+1 <= changes_lists['name_keys']:
         change_item = 'name'
     elif index+1 > changes_lists['name_keys'] and index+1 <= changes_lists['price_keys']:
         change_item = 'price'
-    elif index+1 > changes_lists['price_keys'] and index+1 <= changes_lists['discription_keys']:
+    elif index+1 > changes_lists['price_keys'] and index+1 <= changes_lists['description_keys']:
         change_item = 'description'
+    elif index+1 > changes_lists['description_keys']:
+        change_item = 'count'
     return change_item
 
 
@@ -78,7 +81,7 @@ async def kabinet_cases_main(message: Message, state: FSMContext):
         msg = ''
         for lot in text:
             # print("lot ",lot)
-            msg = msg + f'\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(lot[1])} рублей'
+            msg = msg + f'\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(f'{lot[1]}x{lot[4]}')} рублей'
             if lot[2] is not None: msg = msg + f' <i>({lot[2]})</i>'
         await message.answer(text=f"Твои кейсы:{msg}.\nХочешь изменить информацию?",
                              reply_markup=builder.as_markup(resize_keyboard=True),
@@ -127,11 +130,31 @@ async def kabinet_new_ask_price(message: Message, state: FSMContext):
     try:
         msg = float(msg.replace(",", "."))
         await state.update_data(price=message.text)
+        await message.reply(text='Окей, сколько ты их закупил? ')
+        await state.set_state(Kabinet_сases_state.Kabinet_cases_new_ask_count)
+    except ValueError:
+        await message.reply('Вводи пожалуйста только цифры')
+        await state.set_state(Kabinet_сases_state.Kabinet_cases_new_ask_price)
+    except Exception as e:
+        print('словил хуйню',e)
+        pass
+
+
+@router.message(F.text, Kabinet_сases_state.Kabinet_cases_new_ask_count)
+async def kabinet_new_ask_count(message: Message, state: FSMContext):
+    builder = ReplyKeyboardBuilder()
+    builder.add(KeyboardButton(text='◀️ Назад'))
+    builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
+    msg = message.text
+    try:
+        msg = int(msg)
+        await state.update_data(count=msg)
         await message.reply(text='Принято, ждем добавления...⏳')
         # await state.set_state(Ignor_user_State.Ignoring)
         user_data = await state.get_data()
+        # print(user_data)
         text = await database.add_case(user_data, user_id=message.from_user.id)
-        msg = (f'{text['name']} был добавлен в твою базу данных со стоимостью в {user_data['price']}.'
+        msg = (f'{text['name']} был добавлен в твою базу данных со стоимостью в {user_data['price']} рублей. Тобой было закуплено {user_data['count']} шт.'
                '\nХочешь добавить комментарий к этой закупке? '
                'Можешь написать его сообщением или, если нет, то жми на кнопку')
         await message.answer(text=msg,
@@ -140,9 +163,9 @@ async def kabinet_new_ask_price(message: Message, state: FSMContext):
         await state.set_state(Kabinet_сases_state.Kabinet_cases_new_ask_komment)
     except ValueError:
         await message.reply('Вводи пожалуйста только цифры')
-        await state.set_state(Kabinet_сases_state.Kabinet_cases_new_ask_price)
     except Exception as e:
         print('словил хуйню',e)
+        await message.answer(f'произошла ошибка, расскажи пожалуйста комунибудь о ней\n{e}')
         pass
 
 
@@ -163,7 +186,7 @@ async def kabinet_cases_change(message: Message, state: FSMContext):
     await message.answer(text='Напиши в чат id кейса, информацию о котором ты хочешь изменить.'
                               '\nID пишется в списке перед его названием, при их выводе, в кабинете. '
                               'Через запятую после ID ты должен написать что хочешь изменить из списка '
-                              '(<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>)'
+                              '(<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>, <u>колличество</u>)'
                               f'\nПример команды: {html.bold('32, комментарий')}',
                          parse_mode=ParseMode.HTML,
                          reply_markup=builder.as_markup(resize_keyboard=True)
