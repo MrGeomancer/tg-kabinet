@@ -1,5 +1,6 @@
 import sqlite3
 import logging
+import datetime
 
 import parsing
 
@@ -114,6 +115,16 @@ async def get_tokens(user_id):
         # print(for_parsing)
         for item in for_parsing:
             # print(item)
-            dict_for_parsing.update({i:{'name':item[1],'token':item[0],'price':item[2],'count':item[3],'lastprice':item[4], 'timecheck':item[5]}})
+            dict_for_parsing.update({i:{'name':item[1],'token':item[0],'price':item[2],'count':item[3],'nowprice':'','lastprice':item[4], 'timecheck':item[5]}})
             i += 1
         return dict_for_parsing
+
+
+async def update_lastprice(data_list):
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        for item in data_list.values():
+            cursor.execute('UPDATE cases SET lastprice = ?, timecheck = ? WHERE token = ?',[
+                            item['nowprice'], datetime.datetime.now(), item['token']
+                           ])
+        db.commit()

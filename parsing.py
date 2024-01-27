@@ -58,14 +58,15 @@ async def get_pricec(user_id):
     for item in data_list.values():
         # print(item)
         token = item['token']
-        # print(token)
+        # print('token:',token)
         url = f'https://steamcommunity.com/market/itemordershistogram?country=RU&language=russian&currency=5&item_nameid={token}'
-        price_page = BeautifulSoup(requests.get(url, cookies=cookies, headers=headers).text, 'lxml')
-        price=price_page.split("""<span class='\"market_commodity_orders_header_promote\"'>""")[1].split('&lt;\/span&gt;')
+        price_page = str(BeautifulSoup(requests.get(url, cookies=cookies, headers=headers).text, 'lxml'))
+        price=price_page.split(r"""Начальная цена: <span class='\"market_commodity_orders_header_promote\"'>""")[2].split(r'&lt;\/span&gt;')[0]
         # print(price_page)
-        # price_div = str(price_page.find("class", '\"market_commodity_orders_header_promote\"'))
-        print(price)
+        item.update({'nowprice':price})
+        # print('newitem:',item)
         # buy_order_summary
+    await database.update_lastprice(data_list)
     return data_list
 
 if __name__ == "__main__":
