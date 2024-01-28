@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import aiohttp
 
 import database
 
@@ -34,12 +35,19 @@ headers = {
 }
 
 
+async def get_html(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, cookies=cookies, headers=headers) as resp:
+            return await resp.text()
+
+
 async def get_name_token(url):
     global cookies, headers
     # print(url)
     name_token = {'name':"", 'token':""}
     while name_token['name'] == "":
-        case_page = BeautifulSoup(requests.get(url, cookies=cookies, headers=headers).text, 'lxml')
+        response = await get_html(url)
+        case_page = BeautifulSoup(response, 'lxml')
         token_div = str(case_page.find("div", 'responsive_page_template_content'))
         token = (token_div[token_div.index('Market_LoadOrderSpread') + 24
                            :
@@ -60,7 +68,8 @@ async def get_pricec(user_id):
         token = item['token']
         # print('token:',token)
         url = f'https://steamcommunity.com/market/itemordershistogram?country=RU&language=russian&currency=5&item_nameid={token}'
-        price_page = str(BeautifulSoup(requests.get(url, cookies=cookies, headers=headers).text, 'lxml'))
+        response = await get_html(url)
+        price_page = str(BeautifulSoup(response, 'lxml'))
         price=price_page.split(r"""Начальная цена: <span class='\"market_commodity_orders_header_promote\"'>""")[2].split(r'&lt;\/span&gt;')[0]
         # print(price_page)
         item.update({'nowprice':price})
