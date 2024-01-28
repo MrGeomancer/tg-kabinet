@@ -27,7 +27,7 @@ class Kabinet_сases_state(StatesGroup):
 changes_lists={
                'name':['название','имя','и'],
                'price':['цена закупки', 'цена', 'цену','стоимость','ц'],
-               'discription':['комментарий','коммент','описание','ком','описание'],
+               'description':['комментарий','коммент','описание','ком','описание'],
                'count':['кол-во','колличество','колво','количество','закуп','объем','к','кол'],
                }
 
@@ -38,7 +38,7 @@ for znach in changes_lists.values():
 
 changes_lists.update({"name_keys":len(changes_lists['name']),
                       "price_keys":len(changes_lists['price']),
-                      "discription_keys":len(changes_lists['discription']),
+                      "description_keys":len(changes_lists['description']),
                       "count_keys":len(changes_lists['count'])
                       })
 
@@ -46,12 +46,14 @@ changes_lists.update({"name_keys":len(changes_lists['name']),
 async def take_change(index):
     if index+1 <= changes_lists['name_keys']:
         change_item = 'name'
-    elif index+1 > changes_lists['name_keys'] and index+1 <= changes_lists['price_keys']:
+    elif index+1 > changes_lists['name_keys'] and index+1 <= changes_lists['price_keys']+changes_lists['name_keys']:
         change_item = 'price'
-    elif index+1 > changes_lists['price_keys'] and index+1 <= changes_lists['description_keys']:
+    elif index+1 > changes_lists['price_keys']+changes_lists['name_keys'] and index+1 <= changes_lists['price_keys']+changes_lists['name_keys']+changes_lists['description_keys']:
         change_item = 'description'
-    elif index+1 > changes_lists['description_keys']:
+    elif index+1 > changes_lists['price_keys']+changes_lists['name_keys']+changes_lists['description_keys']:
         change_item = 'count'
+        print(changes_lists)
+        print('index:',index)
     return change_item
 
 
@@ -215,7 +217,7 @@ async def kabinet_cases_change_ask(message: Message, state: FSMContext):
         await state.set_state(Kabinet_сases_state.Kabinet_cases_chng_ask)
     elif msg[1] not in changes_list:
         print('предложенного параметра нет в списке')
-        await message.reply(text='Тебе надо отправить ID и через запяную написать что изменить, как в примере в прошлом сообщении. Используй что-то одно из (<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>)\n<b>ID</b>,<b>что изменить</b>',
+        await message.reply(text='Тебе надо отправить ID и через запяную написать что изменить, как в примере в прошлом сообщении. Используй что-то одно из (<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>, <u>колличество</u>)\n<b>ID</b>,<b>что изменить</b>',
                             parse_mode=ParseMode.HTML,
                             reply_markup=builder.as_markup(resize_keyboard=True)
                             )
