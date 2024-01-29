@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import aiohttp
+import logging
 
 import database
 
@@ -36,13 +37,13 @@ headers = {
 
 
 async def get_html(url):
+    global cookies, headers
     async with aiohttp.ClientSession() as session:
         async with session.get(url, cookies=cookies, headers=headers) as resp:
             return await resp.text()
 
 
 async def get_name_token(url):
-    global cookies, headers
     # print(url)
     name_token = {'name':"", 'token':""}
     while name_token['name'] == "":
@@ -58,9 +59,11 @@ async def get_name_token(url):
     return name_token
 
 
-async def get_pricec(user_id):
-    global cookies, headers, price_page
+async def get_prices(user_id):
     data_list = await database.get_tokens(user_id)
+    if data_list == {}:
+        return ''
+        logging.error(f'База данных у пользователя {user_id} пустая')
     # print('data_list:',data_list)
     # print('data_list.values',data_list.values())
     for item in data_list.values():
@@ -77,6 +80,27 @@ async def get_pricec(user_id):
         # buy_order_summary
     await database.update_lastprice(data_list)
     return data_list
+
+async def get_money_currency(url):
+    response = await get_html(url)
+    money_page = BeautifulSoup(response, 'lxml')
+    currency_div = str(money_page.find_all("span", "cursor-pointer"))
+    currency_values = await re.findall(r'\d+.\d+', currency_div)
+    # print(currency_values)
+    value_data = {'USD':{'SELL':currency_values[0],'BUY':currency_values[1]},
+                  'EUR':{'SELL':currency_values[2],'BUY':currency_values[3]},
+                  'CNY':{'SELL':currency_values[4],'BUY':currency_values[5]},
+                  'AED':{'SELL':currency_values[8],'BUY':currency_values[9]}}
+    # print(value_data)
+    return value_data
+
+
+async def get_gold(url):
+    response = await get_html(url)
+    list = str(response.text)
+    data_list=eval(list)
+    gold_data={'date':data_list[0]['DATE'],'sell':data_list[0]['VAL1'],'buy':data_list[1]['VAL1']}
+    return gold_data
 
 if __name__ == "__main__":
     get_name_token('https://steamcommunity.com/market/listings/730/Snakebite%20Case')
