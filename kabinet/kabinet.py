@@ -10,7 +10,7 @@ import config
 from kabinet import cases, byones, money
 
 router = Router()
-router.include_routers(cases.router)
+router.include_routers(cases.router, money.router)
 
 
 @router.message(F.text == "👨‍🏫 Мой кабинет")
@@ -25,7 +25,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
     builder.adjust(2)
     await message.answer(text=f"Привет {html.bold(html.quote(message.from_user.full_name))}, тут ты можешь посмотреть "
                               "внесенную тобой информацию по\n◦ Кейсам \n"
-                              # "◦ Одиночным покупкам \n"   
+                              # "◦ Одиночным покупкам \n"
                               "◦ Валютам,\nа так же, "
                               "в случае необходимости, изменить её. На что смотрим?",
                          reply_markup=builder.as_markup(resize_keyboard=True),

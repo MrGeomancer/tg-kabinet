@@ -21,12 +21,35 @@ with sqlite3.connect('database.db') as db:
     )""")
     db.commit()
 
+    cursor.execute("""CREATE TABLE IF NOT EXISTS money(
+    moneyid INTEGER PRIMARY KEY,
+    userid TEXT,
+    name TEXT,
+    price REAL DEFAULT (0),
+    count INTEGER DEFAULT (1),
+    komment TEXT,
+    lastprice REAL DEFAULT (0),
+    timecheck TEXT DEFAULT (0)
+    )""")
+    db.commit()
+
 
 async def take_names_and_prices(user_id):
     # print(user_id)
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
         cursor.execute("SELECT name, price, komment, caseid, count FROM cases WHERE userid = ?", [user_id])
+        cases = cursor.fetchall()
+        # print(cases)
+        db.commit()
+        return cases
+
+
+async def money_take_names_and_prices(user_id):
+    # print(user_id)
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        cursor.execute("SELECT name, price, komment, moneyid, count FROM money WHERE userid = ?", [user_id])
         cases = cursor.fetchall()
         # print(cases)
         db.commit()
@@ -48,6 +71,21 @@ async def add_case(user_data, user_id):
                            (user_id, user_data['link'],name_token['token'], name_token['name'], user_data['price'], user_data['count']))
             db.commit()
             return name_token
+        except Exception as e:
+            print('Ошибка при добавлении в таблицу\n', e)
+            db.commit()
+
+
+async def add_money(user_data, user_id):
+    print(user_data)
+    print('name_token:' ,name_token)
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        try:
+            cursor.execute("INSERT INTO money (userid, name, price, count) VALUES (?, ?, ?, ?)",
+                           (user_id, user_data['currency'], user_data['price'], user_data['count']))
+            db.commit()
+            return user_data
         except Exception as e:
             print('Ошибка при добавлении в таблицу\n', e)
             db.commit()
