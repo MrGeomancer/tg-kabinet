@@ -33,6 +33,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
                          )
 
 @router.message(F.text == '◀️ Назад', cases.Kabinet_сases_state.Kabinet_cases)
+@router.message(F.text == '◀️ Назад', money.Kabinet_money_state.Kabinet_money)
 async def kabinet_back(message: Message, state: FSMContext):
     # print('поймал команду Съебаться')
     await state.clear()

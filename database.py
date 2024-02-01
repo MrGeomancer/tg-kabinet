@@ -140,6 +140,29 @@ async def change_smth(user_data, user_id):
             db.commit()
 
 
+async def change_smth_money(user_data, user_id):
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        try:
+            if user_data['change_money_changeitem'] == 'price':
+                cursor.execute('UPDATE money SET price = ? WHERE userid =? AND moneyid = ?',[
+                                user_data['change_money_changenew'], user_id, user_data['change_moneyid']
+                               ])
+            elif user_data['change_money_changeitem'] == 'description':
+                cursor.execute('UPDATE money SET komment = ? WHERE userid =? AND moneyid = ?',[
+                                user_data['change_money_changenew'], user_id, user_data['change_moneyid']
+                               ])
+            elif user_data['change_money_changeitem'] == 'count':
+                cursor.execute('UPDATE money SET count = ? WHERE userid =? AND moneyid = ?',[
+                                user_data['change_money_changenew'], user_id, user_data['change_moneyid']
+                               ])
+            db.commit()
+            return True
+        except Exception as e:
+            logging.error('Ошибка при измененнии чего-то в таблице def database.change_smth_money', exc_info=True)
+            db.commit()
+
+
 async def del_case(user_data, user_id):
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
@@ -150,6 +173,18 @@ async def del_case(user_data, user_id):
             return f'Кейсы с ID {user_data} удалены'
         except Exception as e:
             logging.error('Error at %s', 'def del_case', exc_info=True)
+            return f'Ошибка\n{e}\nПередай её комунибудь, умоляю!!!'
+
+async def del_money(user_data, user_id):
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        try:
+            for item in user_data:
+                cursor.execute('DELETE FROM money WHERE moneyid =?',[item])
+            db.commit()
+            return f'Закупки с ID {user_data} удалены'
+        except Exception as e:
+            logging.error('Error at %s', 'def del_money', exc_info=True)
             return f'Ошибка\n{e}\nПередай её комунибудь, умоляю!!!'
 
 

@@ -90,7 +90,7 @@ async def kabinet_money_main(message: Message, state: FSMContext):
 
 @router.message(F.text == '◀️ Назад', Kabinet_money_state())
 async def kabinet_back(message: Message, state: FSMContext):
-    print('поймал команду Съебаться')
+    # print('поймал команду Съебаться')
     await state.clear()
     await kabinet_money_main(message, state)
 
@@ -147,7 +147,7 @@ async def kabinet_money_new_ask_price(message: Message, state: FSMContext):
         await message.reply('Вводи пожалуйста только цифры')
         await state.set_state(Kabinet_money_state.Kabinet_money_new_ask_price)
     except Exception as e:
-        logging.error('Error at %s', 'def kabinet.money.kabinet_money_new_ask_price', exc_info=e)
+        logging.error('Error at %s', 'def kabinet.money.kabinet_money_new_ask_price', exc_info=True)
         await message.answer(f'произошла ошибка, расскажи пожалуйста комунибудь о ней\n{e}')
         pass
 
@@ -163,17 +163,15 @@ async def kabinet_money_new_ask_count(message: Message, state: FSMContext):
         user_data = await state.get_data()
         # print(user_data)
         text = await database.add_money(user_data, user_id=message.from_user.id)
-        msg = (f'{text['currency']} добавлено в твою базу данных со стоимостью в {user_data['price']} рублей, в объеме {user_data['count']}'
+        msg = (f'{text['currency']} добавлено в твою базу данных со стоимостью в {user_data['price']} рублей, в объеме {user_data['count']}.'
                '\nХочешь добавить комментарий к этой закупке? '
                'Можешь написать его сообщением или, если нет, то жми на кнопку')
-        await message.answer(text=msg,
-                             reply_markup=builder.as_markup(resize_keyboard=True)
-                             )
+        await message.answer(text=msg)
         await state.set_state(Kabinet_money_state.Kabinet_money_new_ask_komment)
     except ValueError:
         await message.reply('Вводи пожалуйста только цифры')
     except Exception as e:
-        print('словил хуйню',e)
+        logging.error('Error at %s', 'def kabinet.kabinet_money_new_ask_count', exc_info=True)
         await message.answer(f'произошла ошибка, расскажи пожалуйста комунибудь о ней\n{e}')
         pass
 
@@ -181,7 +179,7 @@ async def kabinet_money_new_ask_count(message: Message, state: FSMContext):
 @router.message(F.text, Kabinet_money_state.Kabinet_money_new_ask_komment)
 async def kabinet_money_new_ask_komment(message: Message, state: FSMContext):
     await state.update_data(komment=message.text)
-    await database.add_komment(user_data=await state.get_data(), user_id=message.from_user.id)
+    await database.add_komment_money(user_data=await state.get_data(), user_id=message.from_user.id)
     await message.reply(text='Принято.')
     await state.clear()
     await kabinet_money_main(message, state)
@@ -192,10 +190,10 @@ async def kabinet_money_change(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text='◀️ Назад'))
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
-    await message.answer(text='Напиши в чат id кейса, информацию о котором ты хочешь изменить.'
-                              '\nID пишется в списке перед его названием, при их выводе, в кабинете. '
-                              'Через запятую после ID ты должен написать что хочешь изменить из списка '
-                              '(<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>, <u>колличество</u>)'
+    await message.answer(text='Напиши в чат id закупки, информацию о которой ты хочешь изменить.'
+                              '\nID пишется в начале каждой строки списка, при их выводе, в кабинете. '
+                              'Через запятую после ID ты должен написать что хочешь изменить из параметров '
+                              '(<u>цена закупки</u>, <u>комментарий</u>, <u>колличество</u>)'
                               f'\nПример команды: {html.bold('32, комментарий')}',
                          parse_mode=ParseMode.HTML,
                          reply_markup=builder.as_markup(resize_keyboard=True)
@@ -237,9 +235,9 @@ async def kabinet_money_change_ask(message: Message, state: FSMContext):
         await message.answer(text='Давай ты попробуешь еще раз.')
         await state.set_state(Kabinet_money_state.Kabinet_money_chng_ask)
     else:
-        await state.update_data(change_case_id=msg[0])
+        await state.update_data(change_moneyid=msg[0])
         change = await take_change(changes_list.index(msg[1]))
-        await state.update_data(change_case_changeitem=change)
+        await state.update_data(change_money_changeitem=change)
         await message.reply(text=f'Хорошо, напиши в следующем сообщении на какое значение ты хочешь поменять параметр {change}',
                             parse_mode=ParseMode.HTML,
                             reply_markup=builder.as_markup(resize_keyboard=True)
@@ -249,9 +247,9 @@ async def kabinet_money_change_ask(message: Message, state: FSMContext):
 @router.message(F.text, Kabinet_money_state.Kabinet_money_chng_value)
 async def kabinet_money_change_ask_value(message: Message, state: FSMContext):
     await message.reply(text='Хорошо, изменения направлены в базу, сейчас покажу что получилось')
-    await state.update_data(change_case_changenew=message.text)
+    await state.update_data(change_money_changenew=message.text)
     user_data = await state.get_data()
-    result = await database.change_smth(user_data, user_id=message.from_user.id)
+    result = await database.change_smth_money(user_data, user_id=message.from_user.id)
     if result is True:
         await state.clear()
         await kabinet_money_main(message, state)
@@ -266,7 +264,7 @@ async def kabinet_new(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text='◀️ Назад'))
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
-    await message.answer(text='Напиши в чат id кейса, который ты хочешь удалить из своей базы данных.'
+    await message.answer(text='Напиши в чат id закупки, которую ты хочешь удалить из своей базы данных.'
                               '\nID пишется в списке перед его названием, при их выводе, в кабинете. '
                               'Через запятую после ID ты можешь написать еще несколько ID',
                          parse_mode=ParseMode.HTML,
@@ -280,7 +278,7 @@ async def kabinet_new(message: Message, state: FSMContext):
     msg = message.text.split(',')
     for i in range(len(msg)):
         msg[i] = msg[i].strip()
-    text = await database.del_case(msg, user_id=message.from_user.id)
+    text = await database.del_money(msg, user_id=message.from_user.id)
     await message.reply(text)
     await state.clear()
     await kabinet_money_main(message, state)
