@@ -54,7 +54,7 @@ async def get_name_token(url):
                            :
                            token_div.index('PollOnUserActionAfterInterval') - 23])
         name = str(case_page.find('span', 'market_listing_item_name').text)
-        print('имя',name,'токен',token)
+        # print('имя',name,'токен',token)
         name_token['name'], name_token['token'] = name,token
     return name_token
 

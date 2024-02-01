@@ -62,8 +62,8 @@ async def add_case(user_data, user_id):
     #
     #
     name_token = await parsing.get_name_token(user_data['link'])
-    print(user_data)
-    print('name_token:' ,name_token)
+    # print(user_data)
+    # print('name_token:' ,name_token)
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
         try:
@@ -72,13 +72,13 @@ async def add_case(user_data, user_id):
             db.commit()
             return name_token
         except Exception as e:
-            print('Ошибка при добавлении в таблицу\n', e)
+            logging.error('Ошибка при добавлении в таблицу def database.add_case', exc_info=e)
             db.commit()
 
 
 async def add_money(user_data, user_id):
-    print(user_data)
-    print('name_token:' ,name_token)
+    # print(user_data)
+    # print('name_token:' ,name_token)
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
         try:
@@ -87,7 +87,7 @@ async def add_money(user_data, user_id):
             db.commit()
             return user_data
         except Exception as e:
-            print('Ошибка при добавлении в таблицу\n', e)
+            logging.error('%s Ошибка при добавлении в таблицу def database.add_money', exc_info=e)
             db.commit()
 
 
@@ -124,7 +124,7 @@ async def change_smth(user_data, user_id):
             db.commit()
             return True
         except Exception as e:
-            print('Ошибка при измененнии чего-то в таблице\n', e)
+            logging.error('Ошибка при измененнии чего-то в таблице def database.change_smth', exc_info=e)
             db.commit()
 
 

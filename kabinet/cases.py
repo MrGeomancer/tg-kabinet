@@ -52,8 +52,8 @@ async def take_change(index):
         change_item = 'description'
     elif index+1 > changes_lists['price_keys']+changes_lists['name_keys']+changes_lists['description_keys']:
         change_item = 'count'
-        print(changes_lists)
-        print('index:',index)
+        # print(changes_lists)
+        # print('index:',index)
     return change_item
 
 
@@ -96,7 +96,7 @@ async def kabinet_cases_main(message: Message, state: FSMContext):
 
 @router.message(F.text == '◀️ Назад', Kabinet_сases_state())
 async def kabinet_back(message: Message, state: FSMContext):
-    print('поймал команду Съебаться')
+    # print('поймал команду Съебаться')
     await state.clear()
     await kabinet_cases_main(message, state)
 
@@ -120,8 +120,8 @@ async def kabinet_cases_new_ask(message: Message, state: FSMContext):
         await state.update_data(link=message.text)
         await state.set_state(Kabinet_сases_state.Kabinet_cases_new_ask_price)
     else:
-        print(message.text[:44])
-        print('https://steamcommunity.com/market/listings/')
+        # print(message.text[:44])
+        # print('https://steamcommunity.com/market/listings/')
         await message.reply('Принимается только ссылка из адрессной строки браузера, по которой можно перейти на страницу кейса.')
         await message.answer(text='Давай ты попробуешь еще раз.')
 
@@ -139,8 +139,8 @@ async def kabinet_new_ask_price(message: Message, state: FSMContext):
     except ValueError:
         await message.reply('Вводи пожалуйста только цифры')
         await state.set_state(Kabinet_сases_state.Kabinet_cases_new_ask_price)
-    except Exception as e:
-        print('словил хуйню',e)
+    except Exception as e
+        logging.error('словил хуйню %s def kabinet.cases.kabinet_new_ask_price', exc_info=e)
         pass
 
 
@@ -168,7 +168,7 @@ async def kabinet_new_ask_count(message: Message, state: FSMContext):
     except ValueError:
         await message.reply('Вводи пожалуйста только цифры')
     except Exception as e:
-        print('словил хуйню',e)
+        logging.error('словил хуйню %s def kabinet.cases.kabinet_new_ask_count', exc_info=e)
         await message.answer(f'произошла ошибка, расскажи пожалуйста комунибудь о ней\n{e}')
         pass
 
@@ -203,12 +203,12 @@ async def kabinet_cases_change_ask(message: Message, state: FSMContext):
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text='◀️ Назад'))
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
-    print(message.text)
+    # print(message.text)
     msg = message.text.split(',')
     try: msg[1]=msg[1].strip().lower()
     except: pass
     if len(msg) > 2 or len(msg) < 2:
-        print('много запятых')
+        # print('много запятых')
         await message.reply(text='Можно передать только два параметра, разделенных запятой.\n<b>ID</b>,<b>что изменить</b>',
                             parse_mode=ParseMode.HTML,
                             reply_markup=builder.as_markup(resize_keyboard=True)
@@ -216,7 +216,7 @@ async def kabinet_cases_change_ask(message: Message, state: FSMContext):
         await message.answer(text='Давай ты попробуешь еще раз.')
         await state.set_state(Kabinet_сases_state.Kabinet_cases_chng_ask)
     elif msg[1] not in changes_list:
-        print('предложенного параметра нет в списке')
+        # print('предложенного параметра нет в списке')
         await message.reply(text='Тебе надо отправить ID и через запяную написать что изменить, как в примере в прошлом сообщении. Используй что-то одно из (<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>, <u>колличество</u>)\n<b>ID</b>,<b>что изменить</b>',
                             parse_mode=ParseMode.HTML,
                             reply_markup=builder.as_markup(resize_keyboard=True)
@@ -224,7 +224,7 @@ async def kabinet_cases_change_ask(message: Message, state: FSMContext):
         await message.answer(text='Давай ты попробуешь еще раз.')
         await state.set_state(Kabinet_сases_state.Kabinet_cases_chng_ask)
     elif not msg[0].isdigit():
-        print('id написан не цифрой')
+        # print('id написан не цифрой')
         await message.reply(text='Тебе надо отправить числовой ID, он пишется перед названием кейса.\n<b>ID</b>,<b>что изменить</b>',
                             parse_mode=ParseMode.HTML,
                             reply_markup=builder.as_markup(resize_keyboard=True)

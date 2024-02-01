@@ -54,7 +54,7 @@ async def sravnenie(user_data):
 
 @router.message(F.text == "🛒 Сравнить цены")
 async def sravnenie_cen1(message: Message, state: FSMContext):
-    print('зашел')
+    # print('зашел')
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     await state.clear()
@@ -64,7 +64,7 @@ async def sravnenie_cen1(message: Message, state: FSMContext):
 
 @router.message(F.text, Sravn_State.Sravnenie_gr_1)
 async def sravnenie_cen2(message: Message, state: FSMContext):
-    print('зашел в состояние введенных граммов')
+    # print('зашел в состояние введенных граммов')
     msg = message.text
     try:
         msg = float(msg.replace(",", "."))
@@ -80,7 +80,7 @@ async def sravnenie_cen2(message: Message, state: FSMContext):
 
 @router.message(F.text, Sravn_State.Sravnenie_price_1)
 async def sravnenie_cen3(message: Message, state: FSMContext):
-    print('зашел в состоние введенной цены')
+    # print('зашел в состоние введенной цены')
     msg = message.text
     try:
         msg = float(msg.replace(",", "."))
@@ -94,7 +94,7 @@ async def sravnenie_cen3(message: Message, state: FSMContext):
 
 @router.message(F.text, Sravn_State.Sravnenie_gr_2)
 async def sravnenie_cen4(message: Message, state: FSMContext):
-    print('зашел в состояние введенных граммов2')
+    # print('зашел в состояние введенных граммов2')
     msg = message.text
     try:
         msg = float(msg.replace(",", "."))
@@ -114,7 +114,7 @@ async def sravnenie_result(message: Message, state: FSMContext):
     builder.add(KeyboardButton(text='✅ Продолжить'))
     builder.add(KeyboardButton(text='⭕️ Вернуться в главное меню'))
     builder.adjust(1)
-    print('зашел в состоние введеннх всех')
+    # print('зашел в состоние введеннх всех')
     msg = message.text
     try:
         msg = float(msg.replace(",", "."))

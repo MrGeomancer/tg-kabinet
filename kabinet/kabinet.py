@@ -15,7 +15,7 @@ router.include_routers(cases.router, money.router)
 
 @router.message(F.text == "👨‍🏫 Мой кабинет")
 async def kabinet_main_page(message: Message, state: FSMContext):
-    print('зашел в кабинет')
+    # print('зашел в кабинет')
     await state.clear()
     builder = ReplyKeyboardBuilder()
     builder.add(KeyboardButton(text='🧰 Мои кейсы'))
@@ -34,7 +34,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
 
 @router.message(F.text == '◀️ Назад', cases.Kabinet_сases_state.Kabinet_cases)
 async def kabinet_back(message: Message, state: FSMContext):
-    print('поймал команду Съебаться')
+    # print('поймал команду Съебаться')
     await state.clear()
     await kabinet_main_page(message, state)
 

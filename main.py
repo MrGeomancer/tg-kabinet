@@ -12,6 +12,11 @@ import sravnenie
 import lookat_cases
 from kabinet import kabinet
 
+from typing import Callable, Dict, Any, Awaitable
+from aiogram import BaseMiddleware
+from aiogram.types import TelegramObject
+from aiogram.types.update import Update
+
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",)
 # Объект бота
@@ -27,6 +32,19 @@ dp.include_router(last)
 #Состояние игнорирования пользователя
 class Ignor_user_State(StatesGroup):
     Ignoring = State()
+
+
+
+@dp.update.outer_middleware()
+async def database_transaction_middleware(
+    handler: Callable[[Update, Dict[str, Any]], Awaitable[Any]],
+    event: Update,
+    data: Dict[str, Any]
+) -> Any:
+    # print ('event:',event)
+    # print ('data:',data
+    print(event.message.date, ' | @', event.message.chat.username, ' | ',event.message.text, ' | ',data['raw_state'])
+    return await handler(event, data)
 
 # Хэндлер на команду /start
 @dp.message(Command("start"))
@@ -110,6 +128,7 @@ async def nothing(message: types.Message, state: FSMContext):
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
+    dp.update.outer_middleware(SomeMiddleware())
 
 
 if __name__ == "__main__":
