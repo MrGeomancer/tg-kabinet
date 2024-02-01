@@ -72,7 +72,7 @@ async def add_case(user_data, user_id):
             db.commit()
             return name_token
         except Exception as e:
-            logging.error('Ошибка при добавлении в таблицу def database.add_case', exc_info=e)
+            logging.error('Ошибка при добавлении в таблицу def database.add_case', exc_info=True)
             db.commit()
 
 
@@ -87,7 +87,7 @@ async def add_money(user_data, user_id):
             db.commit()
             return user_data
         except Exception as e:
-            logging.error('%s Ошибка при добавлении в таблицу def database.add_money', exc_info=e)
+            logging.error('%s Ошибка при добавлении в таблицу def database.add_money', exc_info=True)
             db.commit()
 
 
@@ -100,6 +100,18 @@ async def add_komment(user_data, user_id):
         cursor.execute('UPDATE cases SET komment = ? WHERE userid = ? AND url = ? AND caseid = ?',
                        [user_data['komment'], user_id, user_data['link'], caseids[-1][0]])
         db.commit()
+
+
+async def add_komment_money(user_data, user_id):
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        cursor.execute('SELECT moneyid FROM money WHERE userid = ?', [user_id])
+        moneyids = cursor.fetchall()
+        # print(caseids)
+        cursor.execute('UPDATE money SET komment = ? WHERE userid = ? AND name = ? AND moneyid = ?',
+                       [user_data['komment'], user_id, user_data['currency'], moneyids[-1][0]])
+        db.commit()
+
 
 async def change_smth(user_data, user_id):
     with sqlite3.connect('database.db') as db:
@@ -124,7 +136,7 @@ async def change_smth(user_data, user_id):
             db.commit()
             return True
         except Exception as e:
-            logging.error('Ошибка при измененнии чего-то в таблице def database.change_smth', exc_info=e)
+            logging.error('Ошибка при измененнии чего-то в таблице def database.change_smth', exc_info=True)
             db.commit()
 
 
@@ -137,7 +149,7 @@ async def del_case(user_data, user_id):
             db.commit()
             return f'Кейсы с ID {user_data} удалены'
         except Exception as e:
-            logging.error('Error at %s', 'def del_case', exc_info=e)
+            logging.error('Error at %s', 'def del_case', exc_info=True)
             return f'Ошибка\n{e}\nПередай её комунибудь, умоляю!!!'
 
 

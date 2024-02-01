@@ -139,8 +139,8 @@ async def kabinet_new_ask_price(message: Message, state: FSMContext):
     except ValueError:
         await message.reply('Вводи пожалуйста только цифры')
         await state.set_state(Kabinet_сases_state.Kabinet_cases_new_ask_price)
-    except Exception as e
-        logging.error('словил хуйню %s def kabinet.cases.kabinet_new_ask_price', exc_info=e)
+    except Exception as e:
+        logging.error('словил хуйню %s def kabinet.cases.kabinet_new_ask_price', exc_info=True)
         pass
 
 
@@ -168,7 +168,7 @@ async def kabinet_new_ask_count(message: Message, state: FSMContext):
     except ValueError:
         await message.reply('Вводи пожалуйста только цифры')
     except Exception as e:
-        logging.error('словил хуйню %s def kabinet.cases.kabinet_new_ask_count', exc_info=e)
+        logging.error('словил хуйню %s def kabinet.cases.kabinet_new_ask_count', exc_info=True)
         await message.answer(f'произошла ошибка, расскажи пожалуйста комунибудь о ней\n{e}')
         pass
 
