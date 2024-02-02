@@ -79,7 +79,7 @@ async def get_prices(user_id):
         item.update({'nowprice':price})
         # print('newitem:',item)
         # buy_order_summary
-    await database.update_lastprice(data_list)
+    await database.update_lastprice(data_list, 'cases')
     return data_list
 
 async def get_money_currency(user_id):
@@ -126,7 +126,8 @@ async def get_money_currency(user_id):
         elif item['name'] in ['USD', 'EUR', 'CHY', 'AED']:
             currency = item['name']
             item['nowprice'] = value_data[currency]['SELL']
-    print(data_list)
+    # print(data_list)
+    await database.update_lastprice(data_list, 'money')
     return data_list
 
 
