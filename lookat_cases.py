@@ -23,7 +23,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
             ttext+=f'<b>{item['name']}</b> сейчас можно продать за <b>{item['nowprice']} </b>'
             nowpricedigit = float(item['nowprice'][:-5].replace(',','.'))
             if nowpricedigit>item['price']: ttext+=f'🟢 Выгода:<b> x{round(nowpricedigit/item['price'],2)}</b>\n'
-            else: ttext+=f'🟥 В минусе:<b> x{round(nowpricedigit/item['price'],2)}</b>/n'
+            else: ttext+=f'🟥 В минусе:<b> x{round(nowpricedigit/item['price'],2)}</b>\n'
     await message.answer(text=ttext, parse_mode=ParseMode.HTML)
     # print(textt)
     # await message.answer(text=textt)
