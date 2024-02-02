@@ -205,11 +205,32 @@ async def get_tokens(user_id):
         return dict_for_parsing
 
 
-async def update_lastprice(data_list):
+async def get_money_data(user_id):
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        cursor.execute("SELECT name, price, count, lastprice, timecheck FROM money WHERE userid = ?", [user_id])
+        for_parsing = cursor.fetchall()
+        db.commit()
+        dict_for_parsing = {}
+        i=0
+        # print(for_parsing)
+        for item in for_parsing:
+            # print(item)
+            dict_for_parsing.update({i:{'name':item[0],'price':item[1],'count':item[2],'nowprice':'','lastprice':item[3], 'timecheck':item[4]}})
+            i += 1
+        return dict_for_parsing
+
+
+async def update_lastprice(data_list,table):
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
         for item in data_list.values():
-            cursor.execute('UPDATE cases SET lastprice = ?, timecheck = ? WHERE token = ?',[
-                            item['nowprice'], datetime.datetime.now(), item['token']
-                           ])
+            if table == 'cases':
+                cursor.execute('UPDATE cases SET lastprice = ?, timecheck = ? WHERE token = ?',[
+                               item['nowprice'], datetime.datetime.now(), item['token']
+                               ])
+            elif table == 'money':
+                cursor.execute('UPDATE money SET lastprice = ?, timecheck = ? WHERE name = ?',[
+                               item['nowprice'], datetime.datetime.now(), item['name']
+                               ])
         db.commit()

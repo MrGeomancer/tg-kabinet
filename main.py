@@ -10,6 +10,7 @@ from aiogram.fsm.context import FSMContext
 import config
 import sravnenie
 import lookat_cases
+import lookat_money
 from kabinet import kabinet
 
 from typing import Callable, Dict, Any, Awaitable
@@ -26,6 +27,7 @@ dp = Dispatcher()
 dp.include_router(sravnenie.router)
 dp.include_router(kabinet.router)
 dp.include_router(lookat_cases.router)
+dp.include_router(lookat_money.router)
 # dp.include_router()
 dp.include_router(last)
 

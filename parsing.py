@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import aiohttp
 import logging
+import re
 
 import database
 
@@ -81,26 +82,53 @@ async def get_prices(user_id):
     await database.update_lastprice(data_list)
     return data_list
 
-async def get_money_currency(url):
-    response = await get_html(url)
-    money_page = BeautifulSoup(response, 'lxml')
-    currency_div = str(money_page.find_all("span", "cursor-pointer"))
-    currency_values = await re.findall(r'\d+.\d+', currency_div)
-    # print(currency_values)
-    value_data = {'USD':{'SELL':currency_values[0],'BUY':currency_values[1]},
-                  'EUR':{'SELL':currency_values[2],'BUY':currency_values[3]},
-                  'CNY':{'SELL':currency_values[4],'BUY':currency_values[5]},
-                  'AED':{'SELL':currency_values[8],'BUY':currency_values[9]}}
-    # print(value_data)
-    return value_data
+async def get_money_currency(user_id):
+    data_list = await database.get_money_data(user_id)
+    if data_list == {}:
+        return ''
+        logging.warning(f'База данных у пользователя {user_id} пустая')
+    GOLDinmoney, currencyinmoney = False, False
+    for item in data_list.values():
+        if item['name'] == 'GOLD':
+            GOLDinmoney = True
+        elif item['name'] in ['USD', 'EUR', 'CHY', 'AED']:
+            currencyinmoney = True
+        if GOLDinmoney == True and currencyinmoney == True:
+            break
+    if GOLDinmoney:
+        url = 'https://rub24.com/an/kot-gold-sber.php'
+        response = await get_html(url)
+        list = str(response)
+        gold_list=eval(list)
+        gold_data={'GOLD':{'date':gold_list[0]['DATE'],'SELL':gold_list[0]['VAL1'],'BUY':gold_list[1]['VAL1']}}
+    if currencyinmoney:
+        url = 'https://bankiros.ru/bank/sberbank/currency'
+        response = await get_html(url)
+        money_page = BeautifulSoup(response, 'lxml')
+        currency_div = str(money_page.find_all("span", "cursor-pointer"))
+        currency_values = re.findall(r'\d+.\d+', currency_div)
+        value_data = {'USD':{'SELL':currency_values[0],'BUY':currency_values[1]},
+                      'EUR':{'SELL':currency_values[2],'BUY':currency_values[3]},
+                      'CNY':{'SELL':currency_values[4],'BUY':currency_values[5]}
+                      }
+                      # ,'AED':{'SELL':currency_values[8],'BUY':currency_values[9]}}
+    for item in data_list.values():
+        if item['name'] == 'GOLD':
+            item.update({'nowprice':gold_data['GOLD']['SELL']})
+        # elif item['name'] == 'USD':
+        #     item.update({'nowprice':value_data['USD']['SELL']})
+        # elif item['name'] == 'EUR':
+        #     item.update({'nowprice':value_data['EUR']['SELL']})
+        # elif item['name'] == 'CHY':
+        #     item.update({'nowprice':value_data['CHY']['SELL']})
+        # elif item['name'] == 'AED':
+        #     item.update({'nowprice':value_data['AED']['SELL']})
+        elif item['name'] in ['USD', 'EUR', 'CHY', 'AED']:
+            currency = item['name']
+            item['nowprice'] = value_data[currency]['SELL']
+    print(data_list)
+    return data_list
 
-
-async def get_gold(url):
-    response = await get_html(url)
-    list = str(response.text)
-    data_list=eval(list)
-    gold_data={'date':data_list[0]['DATE'],'sell':data_list[0]['VAL1'],'buy':data_list[1]['VAL1']}
-    return gold_data
 
 if __name__ == "__main__":
     get_name_token('https://steamcommunity.com/market/listings/730/Snakebite%20Case')
