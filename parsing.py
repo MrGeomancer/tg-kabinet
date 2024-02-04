@@ -40,9 +40,11 @@ headers = {
 async def get_html(url):
     global cookies, headers
     async with aiohttp.ClientSession() as session:
-        async with session.get(url, cookies=cookies, headers=headers) as resp:
-            return await resp.text()
-
+        try:
+            async with session.get(url, cookies=cookies, headers=headers) as resp:
+                return await resp.text()
+        except Exception as e:
+            logging.error('def parsing.get_html', exc_info=True)
 
 async def get_name_token(url):
     # print(url)
@@ -67,12 +69,13 @@ async def get_prices(user_id):
         logging.error(f'База данных у пользователя {user_id} пустая')
     # print('data_list:',data_list)
     # print('data_list.values',data_list.values())
+
+    ### новый вариант вариант
     tokens = []
     for item in data_list.values():
         # print(item)
         if item['token'] not in tokens:
             tokens.append(item['token'])
-
     for token in tokens:
         url = f'https://steamcommunity.com/market/itemordershistogram?country=RU&language=russian&currency=5&item_nameid={token}'
         response = await get_html(url)
@@ -81,6 +84,8 @@ async def get_prices(user_id):
         for item in data_list.values():
             if item['token'] == token:
                 item.update({'nowprice':price})
+
+    ### старый вариант
     # for item in data_list.values():
     #     # print(item)
     #     token = item['token']
