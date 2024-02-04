@@ -15,7 +15,7 @@ from kabinet import kabinet
 
 from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
-from aiogram.types import TelegramObject
+from aiogram.types import TelegramObject, CallbackQuery
 from aiogram.types.update import Update
 
 # Включаем логирование, чтобы не пропустить важные сообщения
@@ -45,7 +45,13 @@ async def database_transaction_middleware(
 ) -> Any:
     # print ('event:',event)
     # print ('data:',data
-    print(event.message.date, ' | @', event.message.chat.username, ' | ',event.message.text, ' | ',data['raw_state'])
+    try:
+        print(event.message.date, ' | @', event.message.chat.username, ' | ',event.message.text, ' | ',data['raw_state'])
+    except AttributeError:
+        print(event.callback_query.message.date,' | @',event.callback_query.message.chat.username, '| нажал на кнопку', event.callback_query.data)
+    except Exception as e:
+        logging.Error('def main.database_transaction_middleware', exc_info=True)
+        print('event:\n*\n*\n',event,'\n*\n*\n*')
     return await handler(event, data)
 
 # Хэндлер на команду /start
