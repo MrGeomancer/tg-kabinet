@@ -67,18 +67,32 @@ async def get_prices(user_id):
         logging.error(f'База данных у пользователя {user_id} пустая')
     # print('data_list:',data_list)
     # print('data_list.values',data_list.values())
+    tokens = []
     for item in data_list.values():
         # print(item)
-        token = item['token']
-        # print('token:',token)
+        if item['token'] not in tokens:
+            tokens.append(item['token'])
+
+    for token in tokens:
         url = f'https://steamcommunity.com/market/itemordershistogram?country=RU&language=russian&currency=5&item_nameid={token}'
         response = await get_html(url)
         price_page = str(BeautifulSoup(response, 'lxml'))
         price=price_page.split(r"""Начальная цена: <span class='\"market_commodity_orders_header_promote\"'>""")[2].split(r'&lt;\/span&gt;')[0]
-        # print(price_page)
-        item.update({'nowprice':price})
-        # print('newitem:',item)
-        # buy_order_summary
+        for item in data_list.values():
+            if item['token'] == token:
+                item.update({'nowprice':price})
+    # for item in data_list.values():
+    #     # print(item)
+    #     token = item['token']
+    #     # print('token:',token)
+    #     url = f'https://steamcommunity.com/market/itemordershistogram?country=RU&language=russian&currency=5&item_nameid={token}'
+    #     response = await get_html(url)
+    #     price_page = str(BeautifulSoup(response, 'lxml'))
+    #     price=price_page.split(r"""Начальная цена: <span class='\"market_commodity_orders_header_promote\"'>""")[2].split(r'&lt;\/span&gt;')[0]
+    #     # print(price_page)
+    #     item.update({'nowprice':price})
+    #     # print('newitem:',item)
+    #     # buy_order_summary
     await database.update_lastprice(data_list, 'cases')
     return data_list
 
