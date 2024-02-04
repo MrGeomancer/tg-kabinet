@@ -123,6 +123,11 @@ async def ignoring_text(message: types.Message, state: FSMContext):
     await message.reply('Подожди, выполняется прошлая команда')
 
 
+@dp.callback_query(F.data == "nothing")
+async def send_more_info(callback: CallbackQuery):
+    await callback.answer()
+
+
 @last.message()
 async def nothing(message: types.Message, state: FSMContext):
     await message.reply('На такую команду я не запрограммирован.')
