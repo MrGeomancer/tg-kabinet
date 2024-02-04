@@ -191,33 +191,33 @@ async def del_money(user_data, user_id):
 async def get_tokens(user_id):
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
-        cursor.execute("SELECT token, name, price, count, lastprice, timecheck FROM cases WHERE userid = ?", [user_id])
+        cursor.execute("SELECT token, name, price, count, lastprice, timecheck, caseid FROM cases WHERE userid = ?", [user_id])
         for_parsing = cursor.fetchall()
         # print(cases)
         db.commit()
         dict_for_parsing = {}
-        i=0
+        # i=0
         # print(for_parsing)
         for item in for_parsing:
             # print(item)
-            dict_for_parsing.update({i:{'name':item[1],'token':item[0],'price':item[2],'count':item[3],'nowprice':'','lastprice':item[4], 'timecheck':item[5]}})
-            i += 1
+            dict_for_parsing.update({item[6]:{'name':item[1],'token':item[0],'price':item[2],'count':item[3],'nowprice':'','lastprice':item[4], 'timecheck':item[5]}})
+            # i += 1
         return dict_for_parsing
 
 
 async def get_money_data(user_id):
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
-        cursor.execute("SELECT name, price, count, lastprice, timecheck FROM money WHERE userid = ?", [user_id])
+        cursor.execute("SELECT name, price, count, lastprice, timecheck, moneyid FROM money WHERE userid = ?", [user_id])
         for_parsing = cursor.fetchall()
         db.commit()
         dict_for_parsing = {}
-        i=0
+        # i=0
         # print(for_parsing)
         for item in for_parsing:
             # print(item)
-            dict_for_parsing.update({i:{'name':item[0],'price':item[1],'count':item[2],'nowprice':'','lastprice':item[3], 'timecheck':item[4]}})
-            i += 1
+            dict_for_parsing.update({item[5]:{'name':item[0],'price':item[1],'count':item[2],'nowprice':'','lastprice':item[3], 'timecheck':item[4]}})
+            # i += 1
         return dict_for_parsing
 
 
