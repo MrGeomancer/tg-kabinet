@@ -132,7 +132,7 @@ async def kabinet_new_ask_price(message: Message, state: FSMContext):
     msg = message.text
     try:
         msg = float(msg.replace(",", "."))
-        await state.update_data(price=message.text)
+        await state.update_data(price=msg)
         await message.reply(text='Окей, сколько ты их закупил? ')
         await state.set_state(Kabinet_сases_state.Kabinet_cases_new_ask_count)
     except ValueError:
