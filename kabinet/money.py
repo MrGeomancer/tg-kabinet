@@ -80,7 +80,7 @@ async def kabinet_money_main(message: Message, state: FSMContext):
             # print("lot ",lot)
             msg = msg + f'\n{lot[3]}. {lot[4]} {html.bold(lot[0])} купленные по {html.bold(f'{lot[1]}')} рублей'
             # msg = msg + f'\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(f'{lot[1]}x{lot[4]}')} рублей'
-            if lot[2] is not None: msg = msg + f' <i>({lot[2]})</i>'
+            if lot[2] is not None: msg = msg + f' (<i>{lot[2]}</i>)'
         await message.answer(text=f"Твои валютные инвестиции:{msg}.\nХочешь изменить информацию?",
                              reply_markup=builder.as_markup(resize_keyboard=True),
                              parse_mode=ParseMode.HTML,
