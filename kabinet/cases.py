@@ -1,6 +1,5 @@
-import asyncio
 from aiogram.fsm.state import StatesGroup, State
-from aiogram import F, Router, Bot, Dispatcher, html
+from aiogram import F, Router, html
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.enums import ParseMode
@@ -253,7 +252,7 @@ async def kabinet_cases_change_ask_value(message: Message, state: FSMContext):
     else:
         await message.answer(text='Что-то пошло не так при изменении данных в базе...')
         await state.clear()
-        await kabinet_main_page(message, state)
+        await kabinet_cases_main(message, state)
 
 
 @router.message(F.text == '➖ Удалить', Kabinet_сases_state.Kabinet_cases)

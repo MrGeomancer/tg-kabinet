@@ -104,8 +104,8 @@ async def get_prices(user_id):
 async def get_money_currency(user_id):
     data_list = await database.get_money_data(user_id)
     if data_list == {}:
-        return ''
         logging.warning(f'База данных у пользователя {user_id} пустая')
+        return ''
     GOLDinmoney, currencyinmoney = False, False
     for item in data_list.values():
         if item['name'] == 'GOLD':

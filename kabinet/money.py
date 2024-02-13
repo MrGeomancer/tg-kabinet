@@ -1,6 +1,6 @@
 import asyncio
 from aiogram.fsm.state import StatesGroup, State
-from aiogram import F, Router, Bot, Dispatcher, html
+from aiogram import F, Router, html
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.enums import ParseMode
@@ -43,7 +43,7 @@ changes_lists.update({"price_keys":len(changes_lists['price']),
 async def take_change(index):
     if index+1 <= changes_lists['price_keys']:
         change_item = 'price'
-    elif index+1 > changes_lists['price_keys'] and index+1 <= changes_lists['description_keys']+changes_lists['price_keys']:
+    elif changes_lists['price_keys'] < index+1 <= changes_lists['description_keys']+changes_lists['price_keys']:
         change_item = 'description'
     elif index+1 > changes_lists['description_keys']+changes_lists['price_keys']:
         change_item = 'count'
@@ -69,8 +69,8 @@ async def kabinet_money_main(message: Message, state: FSMContext):
     text = await database.money_take_names_and_prices(user_id=message.from_user.id)
     # print(text)
     if text == []:
-        builder
-        await message.answer(text="Ты еще не добавил закупок валют в свой кабинет. Можешь добавить сейчас, нажав на кнопку ниже или сделать это позже на этой странице или на странице отслеживания.",
+        await message.answer(text="Ты еще не добавил закупок валют в свой кабинет. Можешь добавить сейчас, нажав на "
+                                  "кнопку ниже или сделать это позже на этой странице или на странице отслеживания.",
                              reply_markup=builder2.as_markup(resize_keyboard=True),
                              parse_mode=ParseMode.HTML,
                              )
@@ -256,7 +256,7 @@ async def kabinet_money_change_ask_value(message: Message, state: FSMContext):
     else:
         await message.answer(text='Что-то пошло не так при изменении данных в базе...')
         await state.clear()
-        await kabinet_main_page(message, state)
+        await kabinet_money_main(message, state)
 
 
 @router.message(F.text == '➖ Удалить', Kabinet_money_state.Kabinet_money)
