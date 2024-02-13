@@ -14,8 +14,7 @@ import lookat_money
 from kabinet import kabinet
 
 from typing import Callable, Dict, Any, Awaitable
-from aiogram import BaseMiddleware
-from aiogram.types import TelegramObject, CallbackQuery
+from aiogram.types import CallbackQuery
 from aiogram.types.update import Update
 
 # Включаем логирование, чтобы не пропустить важные сообщения
