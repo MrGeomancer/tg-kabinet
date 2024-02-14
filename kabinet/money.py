@@ -140,14 +140,15 @@ async def kabinet_money_new_ask_price(message: Message, state: FSMContext):
     msg = message.text
     try:
         msg = float(msg.replace(",", "."))
-        await state.update_data(price=message.text)
+        await state.update_data(price=msg)
         await message.reply(text='Окей, сколько ты их закупил?')
         await state.set_state(Kabinet_money_state.Kabinet_money_new_ask_count)
-    except ValueError:
+    except ValueError as e:
+        logging.error(f'Error at def kabinet.money.kabinet_money_new_ask_price\n{e} ', exc_info=True)
         await message.reply('Вводи пожалуйста только цифры')
         await state.set_state(Kabinet_money_state.Kabinet_money_new_ask_price)
     except Exception as e:
-        logging.error('Error at %s', 'def kabinet.money.kabinet_money_new_ask_price', exc_info=True)
+        logging.error(f'Error at def kabinet.money.kabinet_money_new_ask_price\n{e}', exc_info=True)
         await message.answer(f'произошла ошибка, расскажи пожалуйста комунибудь о ней\n{e}')
         pass
 
@@ -156,7 +157,7 @@ async def kabinet_money_new_ask_price(message: Message, state: FSMContext):
 async def kabinet_money_new_ask_count(message: Message, state: FSMContext):
     msg = message.text
     try:
-        msg = int(msg)
+        msg = float(msg.replace(",", "."))
         await state.update_data(count=msg)
         await message.reply(text='Принято, ждем добавления...⏳')
         # await state.set_state(Ignor_user_State.Ignoring)
@@ -168,7 +169,8 @@ async def kabinet_money_new_ask_count(message: Message, state: FSMContext):
                'Можешь написать его сообщением или, если нет, то жми на кнопку')
         await message.answer(text=msg)
         await state.set_state(Kabinet_money_state.Kabinet_money_new_ask_komment)
-    except ValueError:
+    except ValueError as e:
+        logging.error(f'Error at def kabinet.money.kabinet_money_new_ask_price\n{e} ', exc_info=True)
         await message.reply('Вводи пожалуйста только цифры')
     except Exception as e:
         logging.error('Error at %s', 'def kabinet.kabinet_money_new_ask_count', exc_info=True)
