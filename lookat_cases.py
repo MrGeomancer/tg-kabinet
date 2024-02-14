@@ -43,6 +43,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
         stranica = 1
         await state.update_data(colvo_str=(len(data_list) // 5) + 1)
         await state.update_data(elm_on_last=len(data_list) % 5)
+        await state.update_data(datalist=data_list)
         if len(data_list)%5 == 0:
             await state.update_data(elm_on_last = 5)
 
@@ -61,7 +62,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
 
         await state.update_data(ids = ids_list)
         user_data = await state.get_data()
-        print(user_data)
+        # print(user_data)
         if user_data['colvo_str'] > 1 and user_data['colvo_str'] != 2:
 
 
@@ -85,7 +86,18 @@ async def kabinet_main_page(message: Message, state: FSMContext):
 @router.callback_query(StringToCallbackWithID.filter(F.action == "send_more_info"))
 async def send_more_info(callback: CallbackQuery, callback_data: StringToCallbackWithID, state: FSMContext):
     # print (callback_data)
-    await callback.message.answer(f'нажата кнопка с id {callback_data.value}')
+    user_data = await state.get_data()
+    data_list = user_data['datalist'][callback_data.value]
+    data_list.update({'nowpricedigit':float(data_list['nowprice'][:-5].replace(',','.'))})
+    print(data_list)
+    await callback.message.answer(
+f"""Лот №{callback_data.value}: <b>{data_list['name']}</b>
+Ты купил <b>{data_list['count']} шт.</b> по <b>{data_list['price']}</b> руб. за каждый, а сейчас он вырос в <b>{round(data_list['nowpricedigit']/data_list['price'],2)}</b> раз!
+То есть, если ты сейчас продашь все свои кейсы по цене <b>{data_list['nowprice']}</b> за каждый, то заработаешь <b>{data_list['count']*data_list['price']*(data_list['nowpricedigit']/data_list['price'])} рублей!</b>""", parse_mode=ParseMode.HTML)
+
+    # for item in user_data['datalist'][callback_data.value]:
+    #     await callback.message.answer(f'Лот №{callback_data.value}:{item}\n'
+    #                                   f'{item}, {user_data['datalist'][callback_data.value][item]}')
     await callback.answer(
         text="Спасибо, что воспользовались ботом!",
         show_alert=False
