@@ -149,7 +149,7 @@ async def get_money_currency(user_id):
         item.update({'timecheck':datetime.datetime.now().isoformat(' ', 'seconds')})
     # print(data_list)
     await database.update_lastprice(data_list, 'money')
-    print('даталист ин парсинг',data_list)
+    # print('даталист ин парсинг',data_list)
     return data_list
 
 
