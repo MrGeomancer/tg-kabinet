@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import aiohttp
 import logging
 import re
+import datetime
 
 import database
 
@@ -145,8 +146,10 @@ async def get_money_currency(user_id):
         elif item['name'] in ['USD', 'EUR', 'CHY', 'AED']:
             currency = item['name']
             item['nowprice'] = value_data[currency]['SELL']
+        item.update({'timecheck':datetime.datetime.now().isoformat(' ', 'seconds')})
     # print(data_list)
     await database.update_lastprice(data_list, 'money')
+    print('даталист ин парсинг',data_list)
     return data_list
 
 
