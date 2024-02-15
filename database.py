@@ -191,7 +191,7 @@ async def del_money(user_data, user_id):
 async def get_tokens(user_id):
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
-        cursor.execute("SELECT token, name, price, count, lastprice, timecheck, caseid FROM cases WHERE userid = ?", [user_id])
+        cursor.execute("SELECT token, name, price, count, lastprice, timecheck, caseid, komment FROM cases WHERE userid = ?", [user_id])
         for_parsing = cursor.fetchall()
         # print(cases)
         db.commit()
@@ -200,7 +200,7 @@ async def get_tokens(user_id):
         # print(for_parsing)
         for item in for_parsing:
             # print(item)
-            dict_for_parsing.update({item[6]:{'name':item[1],'token':item[0],'price':item[2],'count':item[3],'nowprice':'','lastprice':item[4], 'timecheck':item[5]}})
+            dict_for_parsing.update({item[6]:{'name':item[1],'token':item[0],'price':item[2],'count':item[3],'nowprice':'','lastprice':item[4], 'timecheck':item[5], 'description':item[7]}})
             # i += 1
         return dict_for_parsing
 
@@ -208,7 +208,7 @@ async def get_tokens(user_id):
 async def get_money_data(user_id):
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
-        cursor.execute("SELECT name, price, count, lastprice, timecheck, moneyid FROM money WHERE userid = ?", [user_id])
+        cursor.execute("SELECT name, price, count, lastprice, timecheck, moneyid, komment FROM money WHERE userid = ?", [user_id])
         for_parsing = cursor.fetchall()
         db.commit()
         dict_for_parsing = {}
@@ -216,7 +216,7 @@ async def get_money_data(user_id):
         # print(for_parsing)
         for item in for_parsing:
             # print(item)
-            dict_for_parsing.update({item[5]:{'name':item[0],'price':item[1],'count':item[2],'nowprice':'','lastprice':item[3], 'timecheck':item[4]}})
+            dict_for_parsing.update({item[5]:{'name':item[0],'price':item[1],'count':item[2],'nowprice':'','lastprice':item[3], 'timecheck':item[4], 'description':item[6]}})
             # i += 1
         return dict_for_parsing
 
@@ -227,10 +227,10 @@ async def update_lastprice(data_list,table):
         for item in data_list.values():
             if table == 'cases':
                 cursor.execute('UPDATE cases SET lastprice = ?, timecheck = ? WHERE token = ?',[
-                               item['nowprice'], datetime.datetime.now(), item['token']
+                               item['nowprice'], datetime.datetime.now().isoformat(' ', 'seconds'), item['token']
                                ])
             elif table == 'money':
                 cursor.execute('UPDATE money SET lastprice = ?, timecheck = ? WHERE name = ?',[
-                               item['nowprice'], datetime.datetime.now(), item['name']
+                               item['nowprice'], datetime.datetime.now().isoformat(' ', 'seconds'), item['name']
                                ])
         db.commit()
