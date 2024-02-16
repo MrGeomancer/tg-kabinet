@@ -12,6 +12,7 @@ import sravnenie
 import lookat_cases
 import lookat_money
 from kabinet import kabinet
+import inline_query_hndlr
 
 from typing import Callable, Dict, Any, Awaitable
 from aiogram.types import CallbackQuery
@@ -27,6 +28,7 @@ dp.include_router(sravnenie.router)
 dp.include_router(kabinet.router)
 dp.include_router(lookat_cases.router)
 dp.include_router(lookat_money.router)
+dp.include_router(inline_query_hndlr.router)
 # dp.include_router()
 dp.include_router(last)
 
@@ -37,7 +39,7 @@ class Ignor_user_State(StatesGroup):
 
 
 @dp.update.outer_middleware()
-async def database_transaction_middleware(
+async def logging_outer_middleware(
     handler: Callable[[Update, Dict[str, Any]], Awaitable[Any]],
     event: Update,
     data: Dict[str, Any]
@@ -47,7 +49,8 @@ async def database_transaction_middleware(
     try:
         print(event.message.date, ' | @', event.message.chat.username, ' | ',event.message.text, ' | ',data['raw_state'])
     except AttributeError:
-        print(event.callback_query.message.date,' | @',event.callback_query.message.chat.username, '| нажал на кнопку', event.callback_query.data)
+        try: print(event.callback_query.message.date,' | @',event.callback_query.message.chat.username, '| нажал на кнопку', event.callback_query.data)
+        except AttributeError: print('@', event.inline_query.from_user.username, ' | inline_query:', event.inline_query.query)
     except Exception as e:
         logging.Error('def main.database_transaction_middleware', exc_info=True)
         print('event:\n*\n*\n',event,'\n*\n*\n*')
