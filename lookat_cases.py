@@ -44,7 +44,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
         ttext = ''
 
         i = 0
-        ids_list = []
+        ids_case_list = []
         stranica = 1
         await state.update_data(colvo_str_case=(len(data_list) // 5) + 1)
         await state.update_data(elm_on_last_case=len(data_list) % 5)
@@ -58,7 +58,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
                 builder.button(text=f"ID{item[0]}",
                                callback_data=StringToCallbackWithID_case(action='send_more_info', value=int(f'{item[0]}')))
                 i += 1
-            ids_list.append(f'{item[0]}')
+            ids_case_list.append(f'{item[0]}')
 
             ttext += f'{item[0]}.<b>{item[1]['name']}</b> сейчас можно продать за <b>{item[1]['nowprice']} </b>'
             nowpricedigit = float(item[1]['nowprice'][:-5].replace(',', '.'))
@@ -67,7 +67,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
             else:
                 ttext += f'🟥 В минусе:<b> x{round(nowpricedigit / item[1]['price'], 2)}</b>\n'
 
-        await state.update_data(ids=ids_list)
+        await state.update_data(ids_case=ids_case_list)
         user_data = await state.get_data()
         # print(user_data)
         if user_data['colvo_str_case'] > 1 and user_data['colvo_str_case'] != 2:
@@ -121,7 +121,7 @@ async def next_inlbtn_case(callback: CallbackQuery, callback_data: ChangeStranic
     user_data = await state.get_data()
     # await callback.message.answer(text=f'{user_data}')
     i = 0
-    for item in user_data['ids'][(stranica - 1) * 5:stranica * 5]:
+    for item in user_data['ids_case'][(stranica - 1) * 5:stranica * 5]:
         builder.button(text=f"ID{item}",
                        callback_data=StringToCallbackWithID_case(action='send_more_info', value=int(f'{item}')))
         i += 1
@@ -163,7 +163,7 @@ async def prev_inlbtn_case(callback: CallbackQuery, callback_data: ChangeStranic
     user_data = await state.get_data()
     # await callback.message.answer(text=f'{user_data}')
     i = 0
-    for item in user_data['ids'][(stranica - 1) * 5:stranica * 5]:
+    for item in user_data['ids_case'][(stranica - 1) * 5:stranica * 5]:
         builder.button(text=f"ID{item}",
                        callback_data=StringToCallbackWithID_case(action='send_more_info', value=int(f'{item}')))
         i += 1
@@ -203,7 +203,7 @@ async def last_inlbtn_case(callback: CallbackQuery, callback_data: ChangeStranic
     elm_on_last_case = user_data['elm_on_last_case'] * -1
 
     i = 0
-    for item in user_data['ids'][elm_on_last_case:]:
+    for item in user_data['ids_case'][elm_on_last_case:]:
         builder.button(text=f"ID{item}",
                        callback_data=StringToCallbackWithID_case(action='send_more_info', value=int(f'{item}')))
         i += 1
@@ -229,7 +229,7 @@ async def first_inlbtn_case(callback: CallbackQuery, callback_data: ChangeStrani
     stranica = 1
 
     i = 0
-    for item in user_data['ids'][:5]:
+    for item in user_data['ids_case'][:5]:
         builder.button(text=f"ID{item}",
                        callback_data=StringToCallbackWithID_case(action='send_more_info', value=int(f'{item}')))
         i += 1
