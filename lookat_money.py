@@ -36,7 +36,7 @@ async def kabinet_main_page(message: Message, state: FSMContext):
     else:
         ttext = ''
         i = 0
-        ids_list = []
+        ids_money_list = []
         stranica = 1
         await state.update_data(colvo_str_money=(len(data_list) // 5) + 1)
         await state.update_data(elm_on_last_money=len(data_list) % 5)
@@ -49,14 +49,14 @@ async def kabinet_main_page(message: Message, state: FSMContext):
                 builder.button(text=f"ID{item[0]}",
                                callback_data=StringToCallbackWithID(action='send_more_info_money', value=int(f'{item[0]}')))
                 i += 1
-            ids_list.append(f'{item[0]}')
+            ids_money_list.append(f'{item[0]}')
             
             ttext+=f'{item[0]}. <b>{item[1]['count']} {item[1]['name']}</b> сейчас можно продать по <b>{item[1]['nowprice']} </b>'
             nowpricedigit = float(item[1]['nowprice'].replace(',','.'))
             if nowpricedigit>float(item[1]['price']): ttext+=f'🟢 Выгода:<b> x{round(nowpricedigit/item[1]['price'],2)}</b>\n'
             else: ttext+=f'🟥 В минусе:<b> x{round(nowpricedigit/item[1]['price'],2)}</b>\n'
 
-        await state.update_data(ids=ids_list)
+        await state.update_data(ids_money=ids_money_list)
         user_data = await state.get_data()
         # print(user_data)
         if user_data['colvo_str_money'] > 1 and user_data['colvo_str_money'] != 2:
@@ -109,7 +109,7 @@ async def next_inlbtn_money(callback: CallbackQuery, callback_data: ChangeStrani
     user_data = await state.get_data()
     # await callback.message.answer(text=f'{user_data}')
     i = 0
-    for item in user_data['ids'][(stranica - 1) * 5:stranica * 5]:
+    for item in user_data['ids_money'][(stranica - 1) * 5:stranica * 5]:
         builder.button(text=f"ID{item}",
                        callback_data=StringToCallbackWithID(action='send_more_info_money', value=int(f'{item}')))
         i += 1
@@ -151,7 +151,7 @@ async def prev_inlbtn_money(callback: CallbackQuery, callback_data: ChangeStrani
     user_data = await state.get_data()
     # await callback.message.answer(text=f'{user_data}')
     i = 0
-    for item in user_data['ids'][(stranica - 1) * 5:stranica * 5]:
+    for item in user_data['ids_money'][(stranica - 1) * 5:stranica * 5]:
         builder.button(text=f"ID{item}",
                        callback_data=StringToCallbackWithID(action='send_more_info_money', value=int(f'{item}')))
         i += 1
@@ -191,7 +191,7 @@ async def last_inlbtn_money(callback: CallbackQuery, callback_data: ChangeStrani
     elm_on_last_money = user_data['elm_on_last_money'] * -1
 
     i = 0
-    for item in user_data['ids'][elm_on_last_money:]:
+    for item in user_data['ids_money'][elm_on_last_money:]:
         builder.button(text=f"ID{item}",
                        callback_data=StringToCallbackWithID(action='send_more_info_money', value=int(f'{item}')))
         i += 1
@@ -217,7 +217,7 @@ async def first_inlbtn_money(callback: CallbackQuery, callback_data: ChangeStran
     stranica = 1
 
     i = 0
-    for item in user_data['ids'][:5]:
+    for item in user_data['ids_money'][:5]:
         builder.button(text=f"ID{item}",
                        callback_data=StringToCallbackWithID(action='send_more_info_money', value=int(f'{item}')))
         i += 1
