@@ -62,10 +62,10 @@ async def kabinet_main_page(message: Message, state: FSMContext):
 
             ttext += f'{item[0]}.<b>{item[1]['name']}</b> сейчас можно продать за <b>{item[1]['nowprice']} </b>'
             nowpricedigit = float(item[1]['nowprice'][:-5].replace(',', '.'))
-            if nowpricedigit > float(item[1]['price']):
-                ttext += f'🟢 Выгода:<b> x{round(nowpricedigit / item[1]['price'], 2)}</b>\n'
+            if nowpricedigit-(nowpricedigit*0.15) > float(item[1]['price']):
+                ttext += f'🟢 Выгода:<b> x{round((nowpricedigit-(nowpricedigit*0.15)) / item[1]['price'], 2)}</b>\n'
             else:
-                ttext += f'🟥 В минусе:<b> x{round(nowpricedigit / item[1]['price'], 2)}</b>\n'
+                ttext += f'🟥 В минусе:<b> x{round((nowpricedigit-(nowpricedigit*0.15)) / item[1]['price'], 2)}</b>\n'
 
         await state.update_data(ids_case=ids_case_list)
         user_data = await state.get_data()
