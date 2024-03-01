@@ -21,11 +21,11 @@ async def inline_query(inline_query: InlineQuery, state: FSMContext):
         for item in user_data['datalist_case'].items():
             idtext = f'case_{item[0]}'
             result_id = hashlib.md5(idtext.encode()).hexdigest()
-            input_contend = InputTextMessageContent(message_text=f'Я в свое время купил {item[1]['count']} шт. {item[1]['name']} на {item[1]['count']*item[1]['price']} рублей. С этой закупки я заработал {(item[1]['count'] * item[1]['price'] * ((float(item[1]['nowprice'][:-5].replace(',', '.'))) / item[1]['price']))-item[1]['count']*item[1]['price']} рублей!')
+            input_contend = InputTextMessageContent(message_text=f"Я в свое время купил {item[1]['count']} шт. {item[1]['name']} на {item[1]['count']*item[1]['price']} рублей. С этой закупки я заработал {(item[1]['count'] * item[1]['price'] * ((float(item[1]['nowprice'][:-5].replace(',', '.'))) / item[1]['price']))-item[1]['count']*item[1]['price']} рублей!")
             items.append(InlineQueryResultArticle(
                 input_message_content=input_contend,
                 id=result_id,
-                title=f'ID{item[0]}: {item[1]['name']}',
+                title=f"ID{item[0]}: {item[1]['name']}",
                 # description='Похвастаться своей прибылью с этой закупки'
                 cach_time=5
             ))
@@ -45,11 +45,11 @@ async def inline_query(inline_query: InlineQuery, state: FSMContext):
         for item in user_data['datalist_money'].items():
             idtext = f'case_{item[0]}'
             result_id = hashlib.md5(idtext.encode()).hexdigest()
-            input_contend = InputTextMessageContent(message_text=f'Я в свое время купил {item[1]['count']}{item[1]['name']} на {item[1]['count']*item[1]['price']} рублей. С этой закупки я заработал {(item[1]['count'] * item[1]['price'] * ((float(item[1]['nowprice'].replace(',', '.'))) / item[1]['price']))-item[1]['count']*item[1]['price']} рублей!')
+            input_contend = InputTextMessageContent(message_text=f"Я в свое время купил {item[1]['count']}{item[1]['name']} на {item[1]['count']*item[1]['price']} рублей. С этой закупки я заработал {(item[1]['count'] * item[1]['price'] * ((float(item[1]['nowprice'].replace(',', '.'))) / item[1]['price']))-item[1]['count']*item[1]['price']} рублей!")
             items.append(InlineQueryResultArticle(
                 input_message_content=input_contend,
                 id=result_id,
-                title=f'ID{item[0]}: {item[1]['count']}{item[1]['name']}',
+                title=f"ID{item[0]}: {item[1]['count']}{item[1]['name']}",
                 # description='Похвастаться своей прибылью с этой закупки'
                 cach_time=5
             ))

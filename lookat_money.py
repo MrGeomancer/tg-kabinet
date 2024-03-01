@@ -51,10 +51,10 @@ async def kabinet_main_page(message: Message, state: FSMContext):
                 i += 1
             ids_money_list.append(f'{item[0]}')
             
-            ttext+=f'{item[0]}. <b>{item[1]['count']} {item[1]['name']}</b> сейчас можно продать по <b>{item[1]['nowprice']} </b>'
+            ttext+=f"{item[0]}. <b>{item[1]['count']} {item[1]['name']}</b> сейчас можно продать по <b>{item[1]['nowprice']} </b>"
             nowpricedigit = float(item[1]['nowprice'].replace(',','.'))
-            if nowpricedigit>float(item[1]['price']): ttext+=f'🟢 Выгода:<b> x{round(nowpricedigit/item[1]['price'],2)}</b>\n'
-            else: ttext+=f'🟥 В минусе:<b> x{round(nowpricedigit/item[1]['price'],2)}</b>\n'
+            if nowpricedigit>float(item[1]['price']): ttext+=f"🟢 Выгода:<b> x{round(nowpricedigit/item[1]['price'],2)}</b>\n"
+            else: ttext+=f"🟥 В минусе:<b> x{round(nowpricedigit/item[1]['price'],2)}</b>\n"
 
         await state.update_data(ids_money=ids_money_list)
         user_data = await state.get_data()
@@ -90,7 +90,7 @@ async def send_more_info_money(callback: CallbackQuery, callback_data: StringToC
 
 <i>Последнее время проверки стоимости: {data_list['timecheck']}
 Потрачено на закупку лота: {data_list['count']*data_list['price']} рублей</i>"""
-    if data_list['description'] is not None: ttext += f'\n<i>Комментарий закупки: {data_list['description']}</i>'
+    if data_list['description'] is not None: ttext += f"\n<i>Комментарий закупки: {data_list['description']}</i>"
     await callback.message.answer(ttext, parse_mode=ParseMode.HTML)
 
     # for item in user_data['datalist_money'][callback_data.value]:

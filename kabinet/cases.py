@@ -84,7 +84,7 @@ async def kabinet_cases_main(message: Message, state: FSMContext):
         msg = ''
         for lot in text:
             # print("lot ",lot)
-            msg = msg + f'\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(f'{lot[1]}x{lot[4]}')} рублей'
+            msg = msg + f"\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(f'{lot[1]}x{lot[4]}')} рублей"
             if lot[2] is not None: msg = msg + f' (<i>{lot[2]}</i>)'
         await message.answer(text=f"Твои кейсы:{msg}.\nХочешь изменить информацию?",
                              reply_markup=builder.as_markup(resize_keyboard=True),
@@ -157,7 +157,7 @@ async def kabinet_new_ask_count(message: Message, state: FSMContext):
         user_data = await state.get_data()
         # print(user_data)
         text = await database.add_case(user_data, user_id=message.from_user.id)
-        msg = (f'{text['name']} был добавлен в твою базу данных со стоимостью в {user_data['price']} рублей. Тобой было закуплено {user_data['count']} шт.'
+        msg = (f"{text['name']} был добавлен в твою базу данных со стоимостью в {user_data['price']} рублей. Тобой было закуплено {user_data['count']} шт."
                '\nХочешь добавить комментарий к этой закупке? '
                'Можешь написать его сообщением или, если нет, то жми на кнопку')
         await message.answer(text=msg,
@@ -190,7 +190,7 @@ async def kabinet_cases_change(message: Message, state: FSMContext):
                               '\nID пишется в списке перед его названием, при их выводе, в кабинете. '
                               'Через запятую после ID ты должен написать что хочешь изменить из списка '
                               '(<u>название</u>, <u>цена закупки</u>, <u>комментарий</u>, <u>колличество</u>)'
-                              f'\nПример команды: {html.bold('32, комментарий')}',
+                              f"\nПример команды: {html.bold('32, комментарий')}",
                          parse_mode=ParseMode.HTML,
                          reply_markup=builder.as_markup(resize_keyboard=True)
                          )
