@@ -78,7 +78,7 @@ async def kabinet_money_main(message: Message, state: FSMContext):
         msg = ''
         for lot in text:
             # print("lot ",lot)
-            msg = msg + f'\n{lot[3]}. {html.bold(lot[4])} {html.bold(lot[0])} купленные по {html.bold(lot[1])} рублей'
+            msg = msg + f"\n{lot[3]}. {html.bold(lot[4])} {html.bold(lot[0])} купленные по {html.bold(lot[1])} рублей"
             # msg = msg + f'\n{lot[3]}.{html.bold(lot[0])} купленный за {html.bold(f'{lot[1]}x{lot[4]}')} рублей'
             if lot[2] is not None: msg = msg + f' (<i>{lot[2]}</i>)'
         await message.answer(text=f"Твои валютные инвестиции:{msg}.\nХочешь изменить информацию?",
@@ -164,7 +164,7 @@ async def kabinet_money_new_ask_count(message: Message, state: FSMContext):
         user_data = await state.get_data()
         # print(user_data)
         text = await database.add_money(user_data, user_id=message.from_user.id)
-        msg = (f'{text['currency']} добавлено в твою базу данных со стоимостью в {user_data['price']} рублей, в объеме {user_data['count']}.'
+        msg = (f"{text['currency']} добавлено в твою базу данных со стоимостью в {user_data['price']} рублей, в объеме {user_data['count']}."
                '\nХочешь добавить комментарий к этой закупке? '
                'Можешь написать его сообщением или, если нет, то жми на кнопку')
         await message.answer(text=msg)
@@ -196,7 +196,7 @@ async def kabinet_money_change(message: Message, state: FSMContext):
                               '\nID пишется в начале каждой строки списка, при их выводе, в кабинете. '
                               'Через запятую после ID ты должен написать что хочешь изменить из параметров '
                               '(<u>цена закупки</u>, <u>комментарий</u>, <u>колличество</u>)'
-                              f'\nПример команды: {html.bold('32, комментарий')}',
+                              f"\nПример команды: {html.bold('32, комментарий')}",
                          parse_mode=ParseMode.HTML,
                          reply_markup=builder.as_markup(resize_keyboard=True)
                          )
